@@ -26,10 +26,15 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    player.cpp \
+    gamelogic.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    player.h \
+    gamelogic.h \
+    card.h
 
 FORMS += \
         mainwindow.ui
