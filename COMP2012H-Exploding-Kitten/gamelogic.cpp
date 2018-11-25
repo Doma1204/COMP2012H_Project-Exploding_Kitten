@@ -49,6 +49,31 @@ void GameLogic::defuse_bomb() {
 
 void GameLogic::play_card(PLAYER_NUM player, CARD_TYPE card) {
     //TODO::
+    switch(card) {
+        case ATTACK:
+            attacked = true;
+            break;
+        case SKIP:
+            skipped = true;
+        break;
+    case SEE_THE_FUTURE:
+        see_the_future();
+        break;
+    case SHUFFLE:
+        shuffle();
+        break;
+//    case NOPE:
+//        nope();
+//        break;
+    }
+
+}
+void GameLogic::see_the_future(PLAYER_NUM player) {
+    //TODO:
+}
+
+void GameLogic::shuffle() {
+
 }
 
 void GameLogic::player_explode() {
@@ -58,6 +83,17 @@ void GameLogic::player_explode() {
     if (--players_left == 1) {
         //TODO:WIN GAME
     }
+}
+
+void GameLogic::end_turn(){
+if (!skipped) {
+    draw_card();
+    skipped = false;
+}
+if (!attacked){
+    pass_turn();
+    attacked = false;
+}
 }
 
 void GameLogic::pass_turn() {

@@ -14,6 +14,7 @@ public:
     ~GameLogic();
     Player* player_list[4];
     Player* current_player;
+    bool attacked;
     vector<CARD_TYPE> deck;
     int players_left;
     void draw_card();
@@ -22,6 +23,7 @@ public:
     void player_explode();
     void play_card(PLAYER_NUM player, CARD_TYPE card);
     void defuse_bomb();
+    void end_turn();
 };
 
 #endif // GAMELOGIC_H
