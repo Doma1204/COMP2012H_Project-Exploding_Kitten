@@ -57,7 +57,7 @@ void GameLogic::play_card(PLAYER_NUM player, CARD_TYPE card) {
             skipped = true;
         break;
     case SEE_THE_FUTURE:
-        see_the_future();
+        see_the_future(player);
         break;
     case SHUFFLE:
         shuffle();
