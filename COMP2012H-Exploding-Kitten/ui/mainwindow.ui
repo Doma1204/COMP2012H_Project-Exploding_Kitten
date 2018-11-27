@@ -27,7 +27,7 @@
      <string>Create Room</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="joinRoom">
     <property name="geometry">
      <rect>
       <x>130</x>

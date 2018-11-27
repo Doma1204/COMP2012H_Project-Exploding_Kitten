@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
+#include "server.h"
+#include "client.h"
 namespace Ui {
 class MainWindow;
 }
@@ -17,9 +18,12 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    Server* server;
+    Client* client;
 
 private slots:
-//    void create_room_handler();
+    void create_room_handler();
+    void join_room_handler();
 };
 
 #endif // MAINWINDOW_H
