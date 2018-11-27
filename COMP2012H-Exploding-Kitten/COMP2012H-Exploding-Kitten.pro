@@ -13,6 +13,7 @@ TEMPLATE = app
 
 INCLUDEPATH += ui
 INCLUDEPATH += src
+INCLUDEPATH += server
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -27,23 +28,33 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+
+
 SOURCES += \
-        main.cpp \
         ui/mainwindow.cpp \
     src/player.cpp \
     src/gamelogic.cpp \
-    ui/game_window.cpp
+    ui/game_window.cpp \
+    server/server.cpp \
+    server/client.cpp\
+    main.cpp
 
 HEADERS += \
         ui/mainwindow.h \
     src/player.h \
     src/gamelogic.h \
     src/card.h \
-    ui/game_window.h
+    ui/game_window.h \
+    server/server.h \
+    server/client.h
 
 FORMS += \
         ui/mainwindow.ui \
     ui/game_window.ui
+
+ QT           += network widgets
+
+requires(qtConfig(combobox))
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
