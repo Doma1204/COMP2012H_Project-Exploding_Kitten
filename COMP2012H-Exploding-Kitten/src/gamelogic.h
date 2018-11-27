@@ -15,6 +15,7 @@ public:
     Player* player_list[4];
     Player* current_player;
     bool attacked;
+    bool skipped;
     vector<CARD_TYPE> deck;
     int players_left;
     void draw_card();
@@ -24,6 +25,8 @@ public:
     void play_card(PLAYER_NUM player, CARD_TYPE card);
     void defuse_bomb();
     void end_turn();
+    void see_the_future(PLAYER_NUM player);
+    void shuffle();
 };
 
 #endif // GAMELOGIC_H

@@ -11,4 +11,13 @@ enum CARD_TYPE{
     NOPE
 };
 
+//class Card {
+//private:
+//	CARD_TYPE type;
+//	Card();
+//	virtual play
+//};
+
+
+
 #endif // CARD_H

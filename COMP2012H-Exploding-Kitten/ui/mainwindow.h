@@ -17,6 +17,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+private slots:
+//    void create_room_handler();
 };
 
 #endif // MAINWINDOW_H
