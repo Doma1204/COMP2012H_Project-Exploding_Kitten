@@ -17,6 +17,7 @@ public:
     ~MainWindow();
 
 private:
+    GameLogic* game;
     Ui::MainWindow *ui;
     Server* server;
     Client* client;

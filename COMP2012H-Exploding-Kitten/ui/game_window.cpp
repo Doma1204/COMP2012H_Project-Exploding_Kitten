@@ -16,3 +16,8 @@ game_window::~game_window()
 void game_window::update_game_window(){
 
 }
+
+void game_window::set_status_label(QString string){
+    ui->connection_status->setText(string);
+}
+

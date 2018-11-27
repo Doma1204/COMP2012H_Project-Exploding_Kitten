@@ -18,12 +18,12 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::create_room_handler(){
-      server = new Server();
-      server->show();
+
+    server = new Server();
+    server->show();
     this->hide();
 }
 void MainWindow::join_room_handler(){
-    client = new Client();
-    client->show();
+    game = new GameLogic(false);
     this->hide();
 }

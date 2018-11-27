@@ -10,7 +10,9 @@ using namespace std;
 class GameLogic
 {
 public:
+    bool server;
     GameLogic(int player_num);
+    GameLogic(bool server);
     ~GameLogic();
     Player* player_list[4];
     Player* current_player;

@@ -1,6 +1,12 @@
 #include "gamelogic.h"
 
 
+GameLogic::GameLogic(bool server) :
+    server(server)
+{
+
+}
+
 GameLogic::GameLogic(int player_num) :
     players_left(player_num)
 {

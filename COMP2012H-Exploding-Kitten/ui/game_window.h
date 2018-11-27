@@ -15,7 +15,7 @@ public:
     explicit game_window(QWidget *parent = nullptr);
     ~game_window();
     void update_game_window();
-
+    void set_status_label(QString);
 private:
     Ui::game_window *ui;
 };
