@@ -1,114 +1,125 @@
 #include "gamelogic.h"
-
-
-GameLogic::GameLogic(bool server) :
-    server(server)
-{
-
-}
-
-GameLogic::GameLogic(int player_num) :
+GameLogic::GameLogic(bool server, int player_num):
+    server(server),
+    player_num(player_num),
+    current_player(PLAYER_1),
+    attacked(false),
+    skipped(false),
     players_left(player_num)
 {
-    player_list[PLAYER_1] = new Player(PLAYER_1);
-    player_list[PLAYER_2] = new Player(PLAYER_2);
-    if (player_num>2) player_list[PLAYER_3] = new Player(PLAYER_3);
-    else player_list[PLAYER_3] = nullptr;
-    if (player_num>3) player_list[PLAYER_4] = new Player(PLAYER_4);
-    else player_list[PLAYER_4] = nullptr;
-
-    current_player = player_list[PLAYER_1];
-}
-
-GameLogic::~GameLogic() {
-    for (int i =0; i<4;i++) {
-        delete player_list[i];
-    }
-}
-
-bool GameLogic::set_current_player(PLAYER_NUM next_player) {
-    if (!player_list[next_player]) {current_player = player_list[next_player]; return true;}
-    return false;
-}
-
-
-void GameLogic::draw_card() {
-    if (deck.back() == EXPLODING_KITTEN) {
-        bool has_defuse = false;
-        for (auto const& card: current_player->hand) {
-            if (card == DEFUSE) has_defuse = true;
+    #define X(a,b) \
+        for (int i=0;i<(b);i++) { \
+            deck.push_back(a); \
         }
-        if (has_defuse) {
-            defuse_bomb();
-            //TODO: remove defuse
-        }else {
-            player_explode();
+    INITIAL_DECK
+    #undef X
+
+    random_shuffle ( deck.begin(), deck.end() );
+    for (int i=0;i<player_num;i++) {
+        player_alive[i]=true;
+        for (int j=0;j<INITIAL_HAND_SIZE;j++) {
+            add_to_player_hand(draw_card(),(PLAYER_NUM) i);
         }
+        send_player_hand((PLAYER_NUM)i);
     }
-    current_player->hand.push_back(deck.back());
+
+
+    for (int i=1;i<player_num;i++) {
+        deck.push_back(EXPLODING_KITTEN);
+    }
+    random_shuffle ( deck.begin(), deck.end() );
+
+}
+
+CARD_TYPE GameLogic::draw_card() {
+    CARD_TYPE temp = deck.back();
     deck.pop_back();
+    return temp;
 }
 
-void GameLogic::defuse_bomb() {
-    //TODO::
+void GameLogic::add_to_player_hand(CARD_TYPE card, PLAYER_NUM player){
+    if (card == EXPLODING_KITTEN) {
+
+        //TODO: let player choose:
+        if (explode(player)) {
+           deck.insert(deck.begin()+rand()%deck.size(),EXPLODING_KITTEN);
+        }
+    } else {
+        player_hand[player].push_back(card);
+    }
 }
 
-void GameLogic::play_card(PLAYER_NUM player, CARD_TYPE card) {
-    //TODO::
+bool GameLogic::explode(PLAYER_NUM player) {
+    send_player_notif(player,EXPLODE);
+    bool has_defuse = false;
+    int defuse_loc = 0;
+    for (int i =0;i<player_hand[player].size();i++) {
+        if (player_hand[player].at(i) == DEFUSE) {
+            defuse_loc = i;has_defuse = true;
+        }
+    }
+    if (has_defuse) {
+        player_hand[player].erase(player_hand[player].begin()+defuse_loc);
+        send_player_notif(player,HAS_DEFUSE);
+        return true;
+    }else {
+//TODO:
+    send_player_notif(player,LOSE);
+    players_left--;
+        return false;
+    }
+
+}
+
+void GameLogic::send_player_hand(PLAYER_NUM player){
+    //TODO:: SEND TO PLAYER
+}
+
+void GameLogic::send_player_notif(PLAYER_NUM player,NOTIF_TYPE type){
+    switch(type) {
+        case SEE_THE_FUT:
+            break;
+        case LOSE:
+            break;
+        case WIN:
+            break;
+        case HAS_DEFUSE:
+            break;
+    }
+    //TODO:: SEND TO PLAYER
+}
+
+
+void GameLogic::player_play_card(CARD_TYPE card, PLAYER_NUM player) {
     switch(card) {
         case ATTACK:
             attacked = true;
+            end_turn();
             break;
         case SKIP:
             skipped = true;
-        break;
-    case SEE_THE_FUTURE:
-        see_the_future(player);
-        break;
-    case SHUFFLE:
-        shuffle();
-        break;
-//    case NOPE:
-//        nope();
-//        break;
-    }
-
-}
-void GameLogic::see_the_future(PLAYER_NUM player) {
-    //TODO:
-}
-
-void GameLogic::shuffle() {
-
-}
-
-void GameLogic::player_explode() {
-    PLAYER_NUM curr_player_num = current_player->player_num;
-    pass_turn();
-    delete player_list[curr_player_num];
-    if (--players_left == 1) {
-        //TODO:WIN GAME
+            end_turn();
+            break;
+        case SEE_THE_FUTURE:
+            send_player_notif(player,SEE_THE_FUT);
+            break;
+        case SHUFFLE:
+            random_shuffle(deck.begin(), deck.end());
+            break;
     }
 }
 
 void GameLogic::end_turn(){
-if (!skipped) {
-    draw_card();
-    skipped = false;
-}
-if (!attacked){
-    pass_turn();
-    attacked = false;
-}
-}
-
-void GameLogic::pass_turn() {
-    PLAYER_NUM next_player = (PLAYER_NUM)((current_player->player_num+1)%4);
-    if (!set_current_player(next_player)) {
-        next_player = (PLAYER_NUM)((current_player->player_num+2)%4);
-        if (!set_current_player(next_player)) {
-            next_player = (PLAYER_NUM)((current_player->player_num+3)%4);
-        }
+    if (skipped) { skipped = false; }
+    else if (attacked) {attacked = false;}
+    else {
+        add_to_player_hand(draw_card(),current_player);
     }
-
+    //TODO: END GAME
+    while (!player_alive[current_player]) {
+        current_player = (PLAYER_NUM) ((current_player + 1) %player_num);
+    }
+    if (players_left == 1) {
+        send_player_notif(current_player,WIN);
+    }
 }

@@ -34,6 +34,29 @@ MainWindow::MainWindow(QWidget *parent) :
     serverPortLineEdit->hide();
     nameLineEdit->hide();
 
+
+    //Game UI
+    endTurnBtn = new QPushButton(QString("End Turn"));
+    playCardBtn = new QPushButton(QString("Play Card"));
+    deckLabel = new QLabel(QString("Deck Size: 30 Cards"));
+    currentPlayerLabel = new QLabel(QString("Current Player: Player 1"));
+    botPlayerLabel = new QLabel(QString("Player 1: 5 cards"));
+    leftPlayerLabel = new QLabel(QString("Player 2: 5 Cards"));
+    topPlayerLabel = new QLabel(QString("Player 3: 5 Cards"));
+    rightPlayerLabel = new QLabel(QString("Player 4: 5 Cards"));
+    handList = new QListView();
+
+    endTurnBtn->hide();
+    playCardBtn->hide();
+    deckLabel->hide();
+    currentPlayerLabel->hide();
+    botPlayerLabel->hide();
+    leftPlayerLabel->hide();
+    topPlayerLabel->hide();
+    rightPlayerLabel->hide();
+    handList->hide();
+
+
     setRequestRoomWindow();
 }
 
@@ -96,6 +119,23 @@ void MainWindow::setJoinRoomWindow() {
 void MainWindow::setRoomWindow() {
 
 }
+
+
+void MainWindow::setGameWindow(){
+    endTurnBtn->show();
+    playCardBtn->show();
+    deckLabel->show();
+    currentPlayerLabel->show();
+    botPlayerLabel->show();
+    leftPlayerLabel->show();
+    topPlayerLabel->show();
+    rightPlayerLabel->show();
+    handList->show();
+}
+void MainWindow::deleteGameWindow(){
+
+}
+
 
 void MainWindow::create_room_handler(){
     qDebug("Create Room");
