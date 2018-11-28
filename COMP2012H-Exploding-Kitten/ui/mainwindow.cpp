@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     serverNameLabel(new QLabel(QString("Server Name:"), this)),
-    serverPortLabel(new QLabel(QString("Server Port"), this)),
+    serverPortLabel(new QLabel(QString("Server Port:"), this)),
     nameLabel(new QLabel(QString("Name:"), this)),
     server(nullptr),
     client(nullptr)
@@ -55,7 +55,7 @@ void MainWindow::setRequestRoomWindow() {
     createRoomBtn->disconnect();
     joinRoomBtn->disconnect();
     connect(createRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setCreateRoomWindow();});
-    connect(joinRoomBtn, &QPushButton::clicked, this, &MainWindow::join_room_handler);
+    connect(joinRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setJoinRoomWindow();});
 }
 
 void MainWindow::deleteRequestRoomWindow() {
@@ -88,9 +88,39 @@ void MainWindow::deleteCreateRoomWindow() {
 }
 
 void MainWindow::setJoinRoomWindow() {
-    serverNameLabel->setGeometry(75, 85, 50, 50);
-    serverNameLineEdit->setGeometry(125, 100, 200, 20);
+    serverNameLabel->setGeometry(50, 85, 100, 50);
+    serverPortLabel->setGeometry(60, 105, 100, 50);
+    nameLabel->setGeometry(95, 125, 50, 50);
+    serverNameLineEdit->setGeometry(140, 100, 200, 20);
+    serverPortLineEdit->setGeometry(140, 120, 200, 20);
+    nameLineEdit->setGeometry(140, 140, 200, 20);
+    joinRoomBtn->setGeometry(275, 270, 125, 30);
+    backBtn->setGeometry(150, 270, 125, 30);
 
+    serverNameLabel->show();
+    serverNameLineEdit->show();
+    serverPortLabel->show();
+    serverPortLineEdit->show();
+    nameLabel->show();
+    nameLineEdit->show();
+    joinRoomBtn->show();
+    backBtn->show();
+
+    joinRoomBtn->disconnect();
+    backBtn->disconnect();
+    connect(backBtn, &QPushButton::clicked, this, [this]() {deleteJoinRoomWindow(); setRequestRoomWindow();});
+    connect(joinRoomBtn, &QPushButton::clicked, this, &MainWindow::join_room_handler);
+}
+
+void MainWindow::deleteJoinRoomWindow() {
+    serverNameLabel->hide();
+    serverNameLineEdit->hide();
+    serverPortLabel->hide();
+    serverPortLineEdit->hide();
+    nameLabel->hide();
+    nameLineEdit->hide();
+    joinRoomBtn->hide();
+    backBtn->hide();
 }
 
 void MainWindow::setRoomWindow() {
@@ -99,12 +129,8 @@ void MainWindow::setRoomWindow() {
 
 void MainWindow::create_room_handler(){
     qDebug("Create Room");
-//    server = new Server();
-//    server->show();
-//    this->hide();
+    QString userName = nameLineEdit->text();
 }
 void MainWindow::join_room_handler(){
     qDebug("Join Room");
-//    game = new GameLogic(false);
-//    this->hide();
 }
