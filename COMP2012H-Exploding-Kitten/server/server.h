@@ -1,49 +1,33 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QDialog>
-#include <QString>
-#include <QVector>
-#include "gamelogic.h"
-#include "game_window.h"
-class QLabel;
-class QTcpServer;
-class QNetworkSession;
 
-class Server : public QDialog
+#include <QTcpServer>
+#include <QVector>
+
+class ServerWorker;
+class Server : public QTcpServer
 {
     Q_OBJECT
-
+    Q_DISABLE_COPY(Server)
 public:
-    explicit Server(QWidget *parent = nullptr, game_window* game_win = nullptr);
-
+    explicit Server(QObject *parent = nullptr);
+protected:
+    void incomingConnection(qintptr socketDescriptor) override;
+signals:
+//    void logMessage(const QString &msg);
+public slots:
+//    void stopServer();
 private slots:
-    void sessionOpened();
-    void sendGameInfo();
-
+//    void broadcast(const QJsonObject &message, ServerWorker *exclude);
+//    void jsonReceived(ServerWorker *sender, const QJsonObject &doc);
+//    void userDisconnected(ServerWorker *sender);
+//    void userError(ServerWorker *sender);
 private:
-        GameLogic* game;
-        game_window* game_win;
-    QTcpServer *tcpServer = nullptr;
-    QNetworkSession *networkSession = nullptr;
+//    void jsonFromLoggedOut(ServerWorker *sender, const QJsonObject &doc);
+//    void jsonFromLoggedIn(ServerWorker *sender, const QJsonObject &doc);
+//    void sendJson(ServerWorker *destination, const QJsonObject &message);
+    QVector<ServerWorker *> clients;
 };
 
-//class Server : public QDialog
-//{
-//    Q_OBJECT
-
-//public:
-//    explicit Server(QWidget *parent = nullptr);
-
-//private slots:
-//    void sessionOpened();
-//    void sendFortune();
-
-//private:
-//    QLabel *statusLabel = nullptr;
-//    QTcpServer *tcpServer = nullptr;
-//    QVector<QString> fortunes;
-//    QNetworkSession *networkSession = nullptr;
-//};
-
-#endif
+#endif // SERVER_H
