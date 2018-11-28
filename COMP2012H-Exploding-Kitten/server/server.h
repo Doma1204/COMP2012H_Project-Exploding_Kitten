@@ -20,10 +20,10 @@ public:
 private slots:
     void sessionOpened();
     void sendGameInfo();
-    GameLogic* game;
-    game_window* game_win;
 
 private:
+        GameLogic* game;
+        game_window* game_win;
     QTcpServer *tcpServer = nullptr;
     QNetworkSession *networkSession = nullptr;
 };

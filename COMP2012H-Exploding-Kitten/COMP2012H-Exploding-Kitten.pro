@@ -37,7 +37,8 @@ SOURCES += \
     ui/game_window.cpp \
     server/server.cpp \
     server/client.cpp\
-    main.cpp
+    main.cpp \
+    server/serverworker.cpp
 
 HEADERS += \
         ui/mainwindow.h \
@@ -46,7 +47,8 @@ HEADERS += \
     src/card.h \
     ui/game_window.h \
     server/server.h \
-    server/client.h
+    server/client.h \
+    server/serverworker.h
 
 FORMS += \
         ui/mainwindow.ui \

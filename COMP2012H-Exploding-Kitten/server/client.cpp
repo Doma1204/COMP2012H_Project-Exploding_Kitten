@@ -135,14 +135,14 @@ void Client::readFortune()
     if (!in.commitTransaction())
         return;
 
-    if (nextFortune == currentFortune) {
-        QTimer::singleShot(0, this, &Client::requestNewFortune);
-        return;
-    }
+//    if (nextFortune == currentFortune) {
+//        QTimer::singleShot(0, this, &Client::requestNewFortune);
+//        return;
+//    }
 
-    currentFortune = nextFortune;
-    statusLabel->setText(currentFortune);
-    getFortuneButton->setEnabled(true);
+//    currentFortune = nextFortune;
+//    statusLabel->setText(currentFortune);
+//    getFortuneButton->setEnabled(true);
 }
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
