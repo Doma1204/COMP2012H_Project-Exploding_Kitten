@@ -6,6 +6,9 @@
 #include "server.h"
 #include "client.h"
 
+#include "gamelogic.h"
+#include "game_window.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -17,7 +20,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    game_window* gameWindow;
 private:
     // UI
     enum Window {NoWindow = 0, RequestRoom, CreateRoom, JoinRoom, Room};

@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QListView>
+#include "notifwindow.h"
+#include <QtDebug>
 namespace Ui {
 class game_window;
 }
@@ -16,6 +18,8 @@ class game_window : public QDialog
 public:
     explicit game_window(QWidget *parent = nullptr);
     ~game_window();
+    NotifWindow* notifWindow;
+
 private:
     Ui::game_window *ui;
     //Game UI
@@ -35,7 +39,8 @@ private:
     void setGameWindow();
     void deleteGameWindow();
 private slots:
-    void createGameWindow();
+    void endTurnBtnHandler();
+    void playCardBtnHandler();
 };
 
 #endif // GAME_WINDOW_H

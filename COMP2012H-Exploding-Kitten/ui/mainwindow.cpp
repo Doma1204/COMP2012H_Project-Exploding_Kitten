@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     client(nullptr)
 {
     ui->setupUi(this);
-
+    this->setWindowTitle(QString("Exploding Kittens"));
     createRoomBtn = new QPushButton(QString("Create Room") ,this);
     joinRoomBtn = new QPushButton(QString("Join Room"), this);
     backBtn = new QPushButton(QString("Back"), this);
@@ -137,5 +137,6 @@ void MainWindow::create_room_handler(){
     client = new Client(this);
 }
 void MainWindow::join_room_handler(){
+
     qDebug("Join Room");
 }
