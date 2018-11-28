@@ -37,19 +37,6 @@ private:
     Server* server;
     Client* client;
 
-    //Game UI
-    QPushButton *endTurnBtn;
-    QPushButton *playCardBtn;
-
-    QLabel *deckLabel;
-    QLabel *currentPlayerLabel;
-    QLabel *leftPlayerLabel;
-    QLabel *rightPlayerLabel;
-    QLabel *topPlayerLabel;
-    QLabel *botPlayerLabel;
-
-    QListView *handList;
-
 
 
     // Window Setting
@@ -61,10 +48,6 @@ private:
     void deleteJoinRoomWindow();
     void setRoomWindow();
     void deleteRoomWindow();
-
-    //Game UI
-    void setGameWindow();
-    void deleteGameWindow();
 
 private slots:
     void create_room_handler();
