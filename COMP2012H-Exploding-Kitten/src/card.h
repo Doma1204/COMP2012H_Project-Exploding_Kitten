@@ -13,9 +13,9 @@ enum CARD_TYPE{
 
 //class Card {
 //private:
-//	CARD_TYPE type;
-//	Card();
-//	virtual play
+//    CARD_TYPE type;
+//    Card(CARD_TYPE type);
+//    virtual play() =0;
 //};
 
 
