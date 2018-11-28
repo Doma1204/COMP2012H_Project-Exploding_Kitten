@@ -2,7 +2,9 @@
 #define GAME_WINDOW_H
 
 #include <QDialog>
-
+#include <QLabel>
+#include <QPushButton>
+#include <QListView>
 namespace Ui {
 class game_window;
 }
@@ -14,10 +16,26 @@ class game_window : public QDialog
 public:
     explicit game_window(QWidget *parent = nullptr);
     ~game_window();
-    void update_game_window();
-    void set_status_label(QString);
 private:
     Ui::game_window *ui;
+    //Game UI
+    QPushButton *endTurnBtn;
+    QPushButton *playCardBtn;
+
+    QLabel *deckLabel;
+    QLabel *currentPlayerLabel;
+    QLabel *leftPlayerLabel;
+    QLabel *rightPlayerLabel;
+    QLabel *topPlayerLabel;
+    QLabel *botPlayerLabel;
+
+    QListView *handList;
+
+    //Game UI
+    void setGameWindow();
+    void deleteGameWindow();
+private slots:
+    void createGameWindow();
 };
 
 #endif // GAME_WINDOW_H

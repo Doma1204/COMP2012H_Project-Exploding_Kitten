@@ -27,7 +27,7 @@ Server::Server(QWidget *parent, game_window* game_win)
         networkSession = new QNetworkSession(config, this);
         connect(networkSession, &QNetworkSession::opened, this, &Server::sessionOpened);
 
-        game_win->set_status_label("Opening network session.");
+//        game_win->set_status_label("Opening network session.");
         networkSession->open();
     } else {
         sessionOpened();
@@ -75,8 +75,8 @@ void Server::sessionOpened()
     // if we did not find one, use IPv4 localhost
     if (ipAddress.isEmpty())
         ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
-    game_win->set_status_label(tr("The server is running on\n\nIP: %1\nport: %2\n\n"
-                            "Run the Fortune Client example now.").arg(ipAddress).arg(tcpServer->serverPort()));
+//    game_win->set_status_label(tr("The server is running on\n\nIP: %1\nport: %2\n\n"
+//                            "Run the Fortune Client example now.").arg(ipAddress).arg(tcpServer->serverPort()));
 }
 
 void Server::sendGameInfo()
