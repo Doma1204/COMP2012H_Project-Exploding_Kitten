@@ -9,6 +9,8 @@
 #include "gamelogic.h"
 #include "game_window.h"
 
+#include <QListWidget>
+
 namespace Ui {
 class MainWindow;
 }
@@ -28,6 +30,8 @@ private:
     QPushButton *createRoomBtn;
     QPushButton *joinRoomBtn;
     QPushButton *backBtn;
+    QPushButton *leaveBtn;
+    QPushButton *startBtn;
 
     QLabel *serverNameLabel;
     QLabel *serverPortLabel;
@@ -37,11 +41,13 @@ private:
     QLineEdit *serverPortLineEdit;
     QLineEdit *nameLineEdit;
 
+    QListWidget *playerList;
+
     GameLogic* game;
     Server* server;
     Client* client;
-
-
+    QString playerName;
+    bool isHost;
 
     // Window Setting
     void setRequestRoomWindow();
@@ -53,9 +59,19 @@ private:
     void setRoomWindow();
     void deleteRoomWindow();
 
+    void destroyRoom();
+    void joinRoom(QString ip, quint16 port);
+    void addPlayer(const QString &playerName);
+    void removePlayer(const QString &playerName);
+
 private slots:
     void create_room_handler();
     void join_room_handler();
+
+    void sendPlayerName();
+    void clientJsonReceived(const QJsonObject &json);
+    void jsonReceived(ServerWorker *sender, const QJsonObject& json);
+
 };
 
 #endif // MAINWINDOW_H

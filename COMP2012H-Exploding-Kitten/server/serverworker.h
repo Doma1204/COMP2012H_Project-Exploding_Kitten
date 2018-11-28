@@ -11,21 +11,21 @@ class ServerWorker : public QObject
 public:
     explicit ServerWorker(QObject *parent = nullptr);
     virtual bool setSocketDescriptor(qintptr socketDescriptor);
-    QString getUserName() const;
-    void setUserName(const QString &userName);
-//    void sendJson(const QJsonObject &jsonData);
+    QString getPlayerName() const;
+    void setPlayerName(const QString &userName);
+    void sendJson(const QJsonObject &json);
 signals:
-//    void jsonReceived(const QJsonObject &jsonDoc);
-//    void disconnectedFromClient();
+    void jsonReceived(const QJsonObject &jsonDoc);
+    void disconnectedFromClient();
 //    void error();
 //    void logMessage(const QString &msg);
 public slots:
-//    void disconnectFromClient();
+    void disconnectFromClient();
 private slots:
-//    void receiveJson();
+    void receiveJson();
 private:
     QTcpSocket *serverSocket;
-    QString userName;
+    QString playerName;
 };
 
 #endif // SERVERWORKER_H

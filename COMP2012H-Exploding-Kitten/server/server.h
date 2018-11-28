@@ -5,7 +5,8 @@
 #include <QTcpServer>
 #include <QVector>
 
-class ServerWorker;
+#include "serverworker.h"
+
 class Server : public QTcpServer
 {
     Q_OBJECT
@@ -18,12 +19,13 @@ protected:
     void incomingConnection(qintptr socketDescriptor) override;
 signals:
 //    void logMessage(const QString &msg);
+    void receiveJson(ServerWorker *sender, const QJsonObject &json);
 public slots:
 //    void stopServer();
 private slots:
-//    void broadcast(const QJsonObject &message, ServerWorker *exclude);
-//    void jsonReceived(ServerWorker *sender, const QJsonObject &doc);
-//    void userDisconnected(ServerWorker *sender);
+    void broadcast(const QJsonObject &json, ServerWorker *exclude = nullptr);
+    void jsonReceived(ServerWorker *sender, const QJsonObject &json);
+    void userDisconnected(ServerWorker *sender);
 //    void userError(ServerWorker *sender);
 private:
     QVector<ServerWorker *> clients;
@@ -31,7 +33,7 @@ private:
     QString ip;
 //    void jsonFromLoggedOut(ServerWorker *sender, const QJsonObject &doc);
 //    void jsonFromLoggedIn(ServerWorker *sender, const QJsonObject &doc);
-//    void sendJson(ServerWorker *destination, const QJsonObject &message);
+    void sendJson(ServerWorker *worker, const QJsonObject &json);
 };
 
 #endif // SERVER_H
