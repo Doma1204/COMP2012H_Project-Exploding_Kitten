@@ -1,68 +1,35 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <QDataStream>
-#include <QDialog>
+#include <QObject>
 #include <QTcpSocket>
-
-class QComboBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QTcpSocket;
-class QNetworkSession;
-
-class Client : public QDialog
+class QHostAddress;
+class QJsonDocument;
+class Client : public QObject
 {
     Q_OBJECT
-
+    Q_DISABLE_COPY(Client)
 public:
-    explicit Client(QWidget *parent = nullptr);
-
+    explicit Client(QObject *parent = nullptr);
+public slots:
+    void connectToServer(const QHostAddress &address, quint16 port);
+//    void login(const QString &userName);
+//    void sendMessage(const QString &text);
+    void disconnectFromHost();
 private slots:
-    void requestNewFortune();
-    void readFortune();
-    void displayError(QAbstractSocket::SocketError socketError);
-    void enableGetFortuneButton();
-    void sessionOpened();
-
+//    void onReadyRead();
+signals:
+    void connected();
+//    void loggedIn();
+//    void loginError(const QString &reason);
+    void disconnected();
+//    void messageReceived(const QString &sender, const QString &text);
+//    void error(QAbstractSocket::SocketError socketError);
+//    void userJoined(const QString &username);
+//    void userLeft(const QString &username);
 private:
-    QComboBox *hostCombo = nullptr;
-    QLineEdit *portLineEdit = nullptr;
-    QLabel *statusLabel = nullptr;
-    QPushButton *getFortuneButton = nullptr;
-
-    QTcpSocket *tcpSocket = nullptr;
-    QDataStream in;
-
-    QNetworkSession *networkSession = nullptr;
+    QTcpSocket *clientSocket;
+//    void jsonReceived(const QJsonObject &doc);
 };
 
-//class Client : public QDialog
-//{
-//    Q_OBJECT
-
-//public:
-//    explicit Client(QWidget *parent = nullptr);
-
-//private slots:
-//    void requestNewFortune();
-//    void readFortune();
-//    void displayError(QAbstractSocket::SocketError socketError);
-//    void enableGetFortuneButton();
-//    void sessionOpened();
-
-//private:
-//    QComboBox *hostCombo = nullptr;
-//    QLineEdit *portLineEdit = nullptr;
-//    QLabel *statusLabel = nullptr;
-//    QPushButton *getFortuneButton = nullptr;
-
-//    QTcpSocket *tcpSocket = nullptr;
-//    QDataStream in;
-//    QString currentFortune;
-
-//    QNetworkSession *networkSession = nullptr;
-//};
-
-#endif
+#endif // CLIENT_H

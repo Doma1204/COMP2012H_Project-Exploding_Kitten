@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "server.h"
+#include "client.h"
 
 #include <QPushButton>
 #include <QLabel>
@@ -128,12 +130,11 @@ void MainWindow::setRoomWindow() {
 
 }
 
-
-
-
 void MainWindow::create_room_handler(){
     qDebug("Create Room");
+    server = new Server(this);
     QString userName = nameLineEdit->text();
+    client = new Client(this);
 }
 void MainWindow::join_room_handler(){
     qDebug("Join Room");

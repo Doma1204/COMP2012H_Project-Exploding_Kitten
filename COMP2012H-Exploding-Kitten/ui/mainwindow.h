@@ -2,9 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "QListView"
+#include "gamelogic.h"
 #include "server.h"
 #include "client.h"
+
 namespace Ui {
 class MainWindow;
 }
