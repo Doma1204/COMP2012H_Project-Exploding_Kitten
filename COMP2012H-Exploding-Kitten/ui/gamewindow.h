@@ -34,6 +34,7 @@ private:
     QLabel *currentPlayerLabel;
     QVector<QLabel*> playerLabel;
 
+    QLabel *recentMove;
     QListWidget *handList;
     Client* client;
     QMap<QString,int> playerOrder;
