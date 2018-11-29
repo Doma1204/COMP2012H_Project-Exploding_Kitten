@@ -1,10 +1,12 @@
 #include "gamelogic.h"
 #include <QJsonDocument>
+#include <QMessageBox>
 int myrand(int i) {return rand()% i;}
 GameLogic::GameLogic(Server* ser) :
     server(ser),
     attacked(false),
-    skipped(false)
+    skipped(false),
+    gameEnded(false)
 {
     for (ServerWorker *worker : server->clients) {
         playerAlive[worker->getPlayerName()] = QJsonValue(true);
@@ -31,6 +33,7 @@ GameLogic::GameLogic(Server* ser) :
         deck.push_back(EXPLODING_KITTEN);
     }
     currentPlayer = playerAlive.begin().key();
+    prevMove = currentPlayer + "'s Turn to move.";
     random_shuffle( deck.begin(), deck.end() ,myrand);
     connect(server, &Server::receiveJson, this, &GameLogic::receiveJson);
     updateAllUi();
@@ -86,8 +89,14 @@ void GameLogic::endTurn(){
         addToPlayerHand(drawCard(),currentPlayer);
     }
     if (playerAliveNum() == 1) {
-        //END GAME
+        QJsonObject::iterator it = playerAlive.find(currentPlayer);
+        do {
+            if (++it == playerAlive.end()) it = playerAlive.begin();
+        }while (it != playerAlive.find(currentPlayer) && !(it.value().toBool()));
+        QMessageBox::information(nullptr, QString(" "),  it.key() + QString(" has won the game!"));
+        gameEnded = true;
     } else {
+        prevMove = currentPlayer + " drew a card and passed.";
         QJsonObject::iterator it = playerAlive.find(currentPlayer);
         do {
             if (++it == playerAlive.end()) it = playerAlive.begin();
@@ -97,12 +106,14 @@ void GameLogic::endTurn(){
 }
 
 void GameLogic::updateAllUi(){
+    if (gameEnded) return;
     QJsonObject gameUiInfo;
     gameUiInfo["type"] = "updateUi";
     gameUiInfo["deckSize"] = (int) deck.size();
     gameUiInfo["playerHand"] = playerHand;
     gameUiInfo["playerAlive"] = playerAlive;
     gameUiInfo["currentPlayer"] = currentPlayer;
+    gameUiInfo["prevMove"] = prevMove;
     QJsonDocument doc(gameUiInfo);
     QByteArray bytes = doc.toJson();
     qDebug() << bytes;
@@ -122,7 +133,10 @@ void GameLogic::receiveJson(ServerWorker *sender, const QJsonObject &json){
     if (sender->getPlayerName() == currentPlayer) {
         if (type == "endTurn") endTurn();
         if (type == "playCard") {
-            playerPlayCard(json.value("card").toString());
+            QJsonArray temp = playerHand[currentPlayer].toArray();
+            QString card = temp.takeAt(json.value("card").toInt()).toString();
+            playerHand[currentPlayer] = temp;
+            playerPlayCard(card);
         }
         updateAllUi();
     }

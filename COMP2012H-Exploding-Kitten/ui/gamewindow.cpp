@@ -16,6 +16,7 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     deckLabel = new QLabel(QString("Deck Size: 30 Cards"),this);
     currentPlayerLabel = new QLabel(QString("Current Player: "),this);
     handList = new QListWidget(this);
+    recentMove = new QLabel("temp",this);
     for (int i=0;i<playerNum;i++) {
         playerLabel.push_back(new QLabel(QString("Player "),this));
     }
@@ -39,11 +40,13 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     deckLabel->setGeometry(320,280,161,31);
     currentPlayerLabel->setGeometry(320,200,161,31);
     handList->setGeometry(60,460,561,91);
+    recentMove->setGeometry(380, 250,161,31);
     handList->show();
     endTurnBtn->show();
     playCardBtn->show();
     deckLabel->show();
     currentPlayerLabel->show();
+    recentMove->show();
     for (QLabel* label : playerLabel) {
         label->show();
     }
@@ -76,7 +79,7 @@ void GameWindow::playCardBtnHandler(){
         return;
     }QJsonObject playCardMsg;
     playCardMsg["type"] = "playCard";
-    playCardMsg["card"] = handList->currentItem()->text();
+    playCardMsg["card"] = handList->row(handList->currentItem());
     client->sendJson(playCardMsg);
 }
 
@@ -103,6 +106,7 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
             }
         }
         currentPlayerLabel->setText(QString("Current Player: ")+json.value(QString("currentPlayer")).toString());
+        recentMove->setText(json.value("prevMove").toString());
     }
 }
 

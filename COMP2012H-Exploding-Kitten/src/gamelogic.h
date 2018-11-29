@@ -13,13 +13,6 @@
 #include <QObject>
 using namespace std;
 
-enum NOTIF_TYPE{
-    LOSE,
-    WIN,
-    SEE_THE_FUT,
-    EXPLODE,
-    HAS_DEFUSE
-};
 
 #define INITIAL_HAND_SIZE 3
 
@@ -27,7 +20,7 @@ enum NOTIF_TYPE{
     X(DEFUSE,20) \
     X(ATTACK,1) \
     X(SKIP,5) \
-    X(SEE_THE_FUTURE,50) \
+    X(SEE_THE_FUTURE,10) \
     X(SHUFFLE,4)
 
 #define X(a,b) b+
@@ -61,9 +54,11 @@ public:
     const QString cardName[CARDS(CARD_COUNT) 0] = {CARDS(CARD_NAME)};
     Server* server;
     QString currentPlayer;
+    QString prevMove;
     bool attacked;
     bool skipped;
     bool player_alive[4] = {false};
+    bool gameEnded;
     QVector<CARD_TYPE> deck;
     QJsonObject playerAlive;
     QJsonObject playerHand;
@@ -76,6 +71,8 @@ public:
     bool defuse(QString playerName);
     void updateAllUi();
     int playerAliveNum();
+
+
 public slots:
     void receiveJson(ServerWorker *sender, const QJsonObject &json);
 };

@@ -1,5 +1,6 @@
 #ifndef CARD_H
 #define CARD_H
+#include <QString>
 
 //enum CARD_TYPE{
 //    DEFUSE,
@@ -10,6 +11,14 @@
 //    SHUFFLE,
 //    NOPE
 //};
+
+class Card {
+private:
+    static Card getCard(QString) {
+
+    }
+
+};
 
 //class Card {
 //private:
