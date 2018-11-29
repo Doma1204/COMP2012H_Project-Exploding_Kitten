@@ -36,6 +36,9 @@ private:
     QLabel *serverNameLabel;
     QLabel *serverPortLabel;
     QLabel *nameLabel;
+    QLabel *playerCountLabel;
+    QLabel *serverNameDetailLabel;
+    QLabel *serverPortDetailLabel;
 
     QLineEdit *serverNameLineEdit;
     QLineEdit *serverPortLineEdit;
@@ -46,8 +49,11 @@ private:
     GameLogic* game;
     Server* server;
     Client* client;
+    QString ip;
+    quint16 port;
     QString playerName;
     bool isHost;
+    bool isConnect;
 
     // Window Setting
     void setRequestRoomWindow();
@@ -60,9 +66,11 @@ private:
     void deleteRoomWindow();
 
     void destroyRoom();
-    void joinRoom(QString ip, quint16 port);
+    void joinRoom();
     void addPlayer(const QString &playerName);
     void removePlayer(const QString &playerName);
+    void leaveRoom();
+    void forceLeaveRoom();
 
 private slots:
     void create_room_handler();
@@ -70,8 +78,6 @@ private slots:
 
     void sendPlayerName();
     void clientJsonReceived(const QJsonObject &json);
-    void jsonReceived(ServerWorker *sender, const QJsonObject& json);
-
 };
 
 #endif // MAINWINDOW_H

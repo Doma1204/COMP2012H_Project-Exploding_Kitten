@@ -42,19 +42,16 @@ void Server::incomingConnection(qintptr socketDesriptor) {
         return;
     }
 
-//    QJsonObject requestNameMsg;
-//    requestNameMsg["type"] = "requestName";
-//    sendJson(worker, requestNameMsg);
-
-//    if (!clients.isEmpty()) {
-//        QJsonObject playerNamesMsg;
-//        QJsonArray playerNames;
-//        for (ServerWorker *worker : clients)
-//            playerNames.append(worker->getUserName());
-//        playerNamesMsg["type"] = "playerList";
-//        playerNamesMsg["playerNames"] = playerNames;
-//        sendJson(worker, playerNamesMsg);
-//    }
+    if (!clients.isEmpty()) {
+        qDebug("Send player list");
+        QJsonObject playerNamesMsg;
+        QJsonArray playerNames;
+        for (ServerWorker *worker : clients)
+            playerNames.append(worker->getPlayerName());
+        playerNamesMsg["type"] = "playerList";
+        playerNamesMsg["playerNames"] = playerNames;
+        sendJson(worker, playerNamesMsg);
+    }
 
     connect(worker, &ServerWorker::disconnectedFromClient, this, std::bind(&Server::userDisconnected, this, worker));
     connect(worker, &ServerWorker::jsonReceived, this, std::bind(&Server::jsonReceived, this, worker, std::placeholders::_1));
@@ -83,11 +80,11 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
 
 void Server::userDisconnected(ServerWorker *sender) {
     clients.removeAll(sender);
-    const QString userName = sender->getPlayerName();
-    if (!userName.isEmpty()) {
+    const QString player = sender->getPlayerName();
+    if (!player.isEmpty()) {
         QJsonObject disconnectedMessage;
         disconnectedMessage["type"] = QString("playerDisconnected");
-        disconnectedMessage["username"] = userName;
+        disconnectedMessage["playerName"] = player;
         broadcast(disconnectedMessage, nullptr);
     }
     sender->deleteLater();
@@ -106,4 +103,10 @@ void Server::broadcast(const QJsonObject &json, ServerWorker *exclude) {
             continue;
         sendJson(worker, json);
     }
+}
+
+void Server::stopServer() {
+    for (ServerWorker *worker : clients)
+        worker->disconnectFromClient();
+    close();
 }

@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QMessageBox>
 #include <QList>
 #include <QHostAddress>
 #include <QJsonObject>
@@ -20,10 +21,14 @@ MainWindow::MainWindow(QWidget *parent) :
     serverNameLabel(new QLabel(QString("Server Name:"), this)),
     serverPortLabel(new QLabel(QString("Server Port:"), this)),
     nameLabel(new QLabel(QString("Name:"), this)),
+    playerCountLabel(new QLabel(this)),
+    serverNameDetailLabel(new QLabel(this)),
+    serverPortDetailLabel(new QLabel(this)),
     server(nullptr),
     client(nullptr),
     playerName(""),
-    isHost(false)
+    isHost(false),
+    isConnect(false)
 {
     ui->setupUi(this);
     this->setWindowTitle(QString("Exploding Kittens"));
@@ -124,9 +129,6 @@ void MainWindow::setJoinRoomWindow() {
     joinRoomBtn->show();
     backBtn->show();
 
-    serverNameLineEdit->setText(QString("10.89.219.100"));
-    nameLineEdit->setText(QString("Joseph"));
-
     joinRoomBtn->disconnect();
     backBtn->disconnect();
     connect(backBtn, &QPushButton::clicked, this, [this]() {deleteJoinRoomWindow(); setRequestRoomWindow();});
@@ -145,14 +147,24 @@ void MainWindow::deleteJoinRoomWindow() {
 }
 
 void MainWindow::setRoomWindow() {
-    playerList->setGeometry(10, 10, 200, 250);
+    playerCountLabel->setGeometry(10, 5, 200, 20);
+    playerList->setGeometry(10, 25, 200, 230);
+    serverNameDetailLabel->setGeometry(220, 0, 200, 50);
+    serverPortDetailLabel->setGeometry(220, 50, 200, 50);
     leaveBtn->setGeometry(275, 270, 125, 30);
 
+    serverNameDetailLabel->setText(QString("Server Name:\n") + ip);
+    serverPortDetailLabel->setText(QString("Server Port:\n") + QString::number(port));
+    playerCountLabel->setText(QString("Player Count:"));
+
+    playerCountLabel->show();
     playerList->show();
+    serverNameDetailLabel->show();
+    serverPortDetailLabel->show();
     leaveBtn->show();
 
     leaveBtn->disconnect();
-    connect(leaveBtn, &QPushButton::clicked, this, [this]() {deleteRoomWindow(); destroyRoom(); setRequestRoomWindow();});
+    connect(leaveBtn, &QPushButton::clicked, this, &MainWindow::leaveRoom);
 
     if (isHost) {
         startBtn->setGeometry(150, 270, 125, 30);
@@ -164,6 +176,9 @@ void MainWindow::setRoomWindow() {
 void MainWindow::deleteRoomWindow() {
     playerList->clear();
     playerList->hide();
+    playerCountLabel->hide();
+    serverNameDetailLabel->hide();
+    serverPortDetailLabel->hide();
     leaveBtn->hide();
     startBtn->hide();
 }
@@ -175,39 +190,61 @@ void MainWindow::destroyRoom() {
         client = nullptr;
     }
     if (server != nullptr) {
+        server->stopServer();
         server->deleteLater();
         server = nullptr;
     }
 }
 
-void MainWindow::joinRoom(QString ip, quint16 port) {
+void MainWindow::joinRoom() {
     client = new Client(this);
     client->connectToServer(QHostAddress(ip), port);
     connect(client, &Client::receiveJson, this, &MainWindow::clientJsonReceived);
     connect(client, &Client::connected, this, &MainWindow::sendPlayerName);
+    connect(client, &Client::connected, this, [this]() {isConnect = true;});
+    connect(client, &Client::disconnected, this, &MainWindow::forceLeaveRoom);
 }
 
 void MainWindow::create_room_handler() {
     qDebug("Create Room");
-    server = new Server(this);
-    connect(server, &Server::receiveJson, this, &MainWindow::jsonReceived);
+    playerName = nameLineEdit->text().simplified();
+    if (playerName.isEmpty()) {
+        QMessageBox::information(this, QString("Empty Name"), QString("Name cannot be empty"));
+        return;
+    }
 
-    playerName = nameLineEdit->text();
+    server = new Server(this);
+    ip = server->getIP();
+    port = server->getPort();
     isHost = true;
-    joinRoom(server->getIP(), server->getPort());
-    qDebug() << server->getIP();
-    qDebug() << server->getPort();
+    joinRoom();
 
     deleteCreateRoomWindow();
     setRoomWindow();
 }
+
 void MainWindow::join_room_handler() {
     qDebug("Join Room");
-    const QString ip = serverNameLineEdit->text();
-    const quint16 port = serverPortLineEdit->text().toUShort();
-    playerName = nameLineEdit->text();
+    ip = serverNameLineEdit->text().simplified();
+    if (ip.isEmpty()) {
+        QMessageBox::information(this, QString("Empty Server Name"), QString("Server name cannot be empty"));
+        return;
+    }
+
+    port = serverPortLineEdit->text().simplified().toUShort();
+    if (!port) {
+        QMessageBox::information(this, QString("Invalid Port"), QString("Invvalid Port"));
+        return;
+    }
+
+    playerName = nameLineEdit->text().simplified();
+    if (playerName.isEmpty()) {
+        QMessageBox::information(this, QString("Empty Name"), QString("Name cannot be empty"));
+        return;
+    }
+
     isHost = false;
-    joinRoom(ip, port);
+    joinRoom();
 
     deleteJoinRoomWindow();
     setRoomWindow();
@@ -238,28 +275,37 @@ void MainWindow::clientJsonReceived(const QJsonObject &json) {
     }
 }
 
-void MainWindow::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
-//    qDebug("Receive Json");
-//    const QString type = json.value(QString("type")).toString();
-//    if (type == "requestName") {
-//        sendPlayerName();
-//    } else if (type == "newPlayer") {
-//        qDebug("Receive New Player");
-//        addPlayer(json.value(QString("playerName")).toString());
-//    } else if (type == "playerList") {
-//        for(QJsonValue playerName : json.value(QString("playerNames")).toArray())
-//            addPlayer(playerName.toString());
-//    } else if (type == "playerDisconnected") {
-
-//    }
-}
-
 void MainWindow::addPlayer(const QString &playerName) {
     QListWidgetItem *newPlayer = new QListWidgetItem(playerName, playerList);
     newPlayer->setTextAlignment(Qt::AlignCenter);
+    playerCountLabel->setText(QString("Player Count: ") + QString::number(playerList->count()));
 }
 
 void MainWindow::removePlayer(const QString &playerName) {
     QList<QListWidgetItem*> players = playerList->findItems(playerName, Qt::MatchExactly);
-    playerList->removeItemWidget(players.takeFirst());
+    for (QListWidgetItem *player : players) {
+        qDebug() << player->text();
+    }
+    delete players.takeFirst();
+    playerCountLabel->setText(QString("Player Count: ") + QString::number(playerList->count()));
+}
+
+void MainWindow::leaveRoom() {
+    QMessageBox::StandardButton reply = QMessageBox::question(this, QString("Leave Room"), QString("Are you sure to leave the room?"));
+    if (reply == QMessageBox::Yes) {
+        isConnect = false;
+        deleteRoomWindow();
+        destroyRoom();
+        setRequestRoomWindow();
+    }
+}
+
+void MainWindow::forceLeaveRoom() {
+    if (!isConnect)
+        return;
+    QMessageBox::information(this, QString("Server Disconnected"), QString("The host server is disconnected."));
+    isConnect = false;
+    deleteRoomWindow();
+    destroyRoom();
+    setRequestRoomWindow();
 }
