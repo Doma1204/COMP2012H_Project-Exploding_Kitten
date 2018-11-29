@@ -107,6 +107,14 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
         }
         currentPlayerLabel->setText(QString("Current Player: ")+json.value(QString("currentPlayer")).toString());
         recentMove->setText(json.value("prevMove").toString());
+        if (json.value(QString("seeTheFutureFlag")).toBool()) {
+            if (json.value(QString("currentPlayer")).toString() == playerName) {
+                const QJsonArray seeTheFutureCards = json.value(QString("seeTheFuture")).toArray();
+                QMessageBox::information(nullptr, "See The Future", "Top Card: "+ seeTheFutureCards[0].toString()
+                                         +"\n Second Card: " + seeTheFutureCards[1].toString()
+                                         +"\n Third Card: " + seeTheFutureCards[2].toString());
+            }
+        }
     }
 }
 

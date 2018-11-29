@@ -6,7 +6,8 @@ GameLogic::GameLogic(Server* ser) :
     server(ser),
     attacked(false),
     skipped(false),
-    gameEnded(false)
+    gameEnded(false),
+    seeTheFutureFlag(false)
 {
     for (ServerWorker *worker : server->clients) {
         playerAlive[worker->getPlayerName()] = QJsonValue(true);
@@ -50,9 +51,7 @@ void GameLogic::addToPlayerHand(CARD_TYPE card, QString playerName){
 
         //TODO: let player choose:
         if (defuse(playerName)) {
-
             deck.insert(deck.begin()+rand()%deck.size(),EXPLODING_KITTEN);
-
         } else {
             playerAlive[playerName] = QJsonValue(false);
             //TODO::lose
@@ -78,13 +77,19 @@ bool GameLogic::defuse(QString playerName) {
 
 
 void GameLogic::playerPlayCard(QString card) {
-
+    if (card == "SEE_THE_FUTURE") {
+        seeTheFutureFlag = true;
+    }
 }
 
 
 void GameLogic::endTurn(){
-    if (skipped) { skipped = false; }
-    else if (attacked) {attacked = false;}
+    if (skipped) {
+        skipped = false;
+    }
+    else if (attacked) {
+        attacked = false;
+    }
     else {
         addToPlayerHand(drawCard(),currentPlayer);
     }
@@ -96,7 +101,7 @@ void GameLogic::endTurn(){
         QMessageBox::information(nullptr, QString(" "),  it.key() + QString(" has won the game!"));
         gameEnded = true;
     } else {
-        prevMove = currentPlayer + " drew a card and passed.";
+        prevMove = currentPlayer + " drew a card and passed. ";
         QJsonObject::iterator it = playerAlive.find(currentPlayer);
         do {
             if (++it == playerAlive.end()) it = playerAlive.begin();
@@ -114,6 +119,32 @@ void GameLogic::updateAllUi(){
     gameUiInfo["playerAlive"] = playerAlive;
     gameUiInfo["currentPlayer"] = currentPlayer;
     gameUiInfo["prevMove"] = prevMove;
+    QJsonArray seeTheFutureArr;
+    if (deck.size()>=3) {
+        seeTheFutureArr.append(cardName[*(deck.end()-1)]);
+        seeTheFutureArr.append(cardName[*(deck.end()-2)]);
+        seeTheFutureArr.append(cardName[*(deck.end()-3)]);
+    } else if (deck.size() == 2) {
+        seeTheFutureArr.append(cardName[*(deck.end()-1)]);
+        seeTheFutureArr.append(cardName[*(deck.end()-2)]);
+        seeTheFutureArr.append("No Card");
+    } else if (deck.size() == 1) {
+        seeTheFutureArr.append(cardName[*(deck.end()-1)]);
+        seeTheFutureArr.append("No Card");
+        seeTheFutureArr.append("No Card");
+    } else {
+        seeTheFutureArr.append("No Card");
+        seeTheFutureArr.append("No Card");
+        seeTheFutureArr.append("No Card");
+    }
+    gameUiInfo["seeTheFuture"] = seeTheFutureArr;
+    if (seeTheFutureFlag) {
+        gameUiInfo["seeTheFutureFlag"] = QJsonValue(true);
+        seeTheFutureFlag = false;
+    } else {
+        gameUiInfo["seeTheFutureFlag"] = QJsonValue(false);
+    }
+
     QJsonDocument doc(gameUiInfo);
     QByteArray bytes = doc.toJson();
     qDebug() << bytes;

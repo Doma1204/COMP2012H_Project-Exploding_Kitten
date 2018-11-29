@@ -59,6 +59,7 @@ public:
     bool skipped;
     bool player_alive[4] = {false};
     bool gameEnded;
+    bool seeTheFutureFlag;
     QVector<CARD_TYPE> deck;
     QJsonObject playerAlive;
     QJsonObject playerHand;
