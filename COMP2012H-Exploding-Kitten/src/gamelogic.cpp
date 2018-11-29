@@ -1,12 +1,16 @@
 #include "gamelogic.h"
-GameLogic::GameLogic(bool server, int player_num):
-    server(server),
-    player_num(player_num),
-    current_player(PLAYER_1),
+
+GameLogic::GameLogic(Server* ser) :
     attacked(false),
     skipped(false),
-    players_left(player_num)
+    server(ser)
 {
+    for (ServerWorker *worker : server->clients) {
+        playerAlive[worker->getPlayerName()] = QJsonValue(true);
+        QJsonArray hand;
+        playerHand[worker->getPlayerName()] = hand;
+    }
+
     #define X(a,b) \
         for (int i=0;i<(b);i++) { \
             deck.push_back(a); \
@@ -15,111 +19,102 @@ GameLogic::GameLogic(bool server, int player_num):
     #undef X
 
     random_shuffle ( deck.begin(), deck.end() );
-    for (int i=0;i<player_num;i++) {
-        player_alive[i]=true;
+
+    for (QString player: playerHand.keys()) {
         for (int j=0;j<INITIAL_HAND_SIZE;j++) {
-            add_to_player_hand(draw_card(),(PLAYER_NUM) i);
+            addToPlayerHand(drawCard(),player);
         }
-        send_player_hand((PLAYER_NUM)i);
     }
 
-
-    for (int i=1;i<player_num;i++) {
+    for (int i=1;i<playersLeft;i++) {
         deck.push_back(EXPLODING_KITTEN);
     }
     random_shuffle ( deck.begin(), deck.end() );
-
+    connect(server, &Server::receiveJson, this, &GameLogic::receiveJson);
 }
 
-CARD_TYPE GameLogic::draw_card() {
+CARD_TYPE GameLogic::drawCard() {
     CARD_TYPE temp = deck.back();
     deck.pop_back();
     return temp;
 }
 
-void GameLogic::add_to_player_hand(CARD_TYPE card, PLAYER_NUM player){
+void GameLogic::addToPlayerHand(CARD_TYPE card, QString playerName){
     if (card == EXPLODING_KITTEN) {
 
         //TODO: let player choose:
-        if (explode(player)) {
-           deck.insert(deck.begin()+rand()%deck.size(),EXPLODING_KITTEN);
+        if (defuse(playerName)) {
+
+            deck.insert(deck.begin()+rand()%deck.size(),EXPLODING_KITTEN);
+
+        } else {
+            playerAlive[playerName] = QJsonValue(false);
+            //TODO::lose
         }
     } else {
-        player_hand[player].push_back(card);
+        playerHand[playerName].toArray().push_back(cardName[card]);
     }
 }
 
-bool GameLogic::explode(PLAYER_NUM player) {
-    send_player_notif(player,EXPLODE);
+bool GameLogic::defuse(QString playerName) {
     bool has_defuse = false;
-    int defuse_loc = 0;
-    for (int i =0;i<player_hand[player].size();i++) {
-        if (player_hand[player].at(i) == DEFUSE) {
-            defuse_loc = i;has_defuse = true;
+    for (QJsonArray::iterator it = playerHand[playerName].toArray().begin(); it<playerHand[playerName].toArray().end();it++) {
+        if (it->toString() == "DEFUSE") {
+            playerHand[playerName].toArray().erase(it);
+            has_defuse = true;
+            break;
         }
     }
-    if (has_defuse) {
-        player_hand[player].erase(player_hand[player].begin()+defuse_loc);
-        send_player_notif(player,HAS_DEFUSE);
-        return true;
-    }else {
-//TODO:
-    send_player_notif(player,LOSE);
-    players_left--;
-        return false;
-    }
-
-}
-
-void GameLogic::send_player_hand(PLAYER_NUM player){
-    //TODO:: SEND TO PLAYER
-}
-
-void GameLogic::send_player_notif(PLAYER_NUM player,NOTIF_TYPE type){
-    switch(type) {
-        case SEE_THE_FUT:
-            break;
-        case LOSE:
-            break;
-        case WIN:
-            break;
-        case HAS_DEFUSE:
-            break;
-    }
-    //TODO:: SEND TO PLAYER
+    return has_defuse;
 }
 
 
-void GameLogic::player_play_card(CARD_TYPE card, PLAYER_NUM player) {
-    switch(card) {
-        case ATTACK:
-            attacked = true;
-            end_turn();
-            break;
-        case SKIP:
-            skipped = true;
-            end_turn();
-            break;
-        case SEE_THE_FUTURE:
-            send_player_notif(player,SEE_THE_FUT);
-            break;
-        case SHUFFLE:
-            random_shuffle(deck.begin(), deck.end());
-            break;
-    }
+void GameLogic::playerPlayCard(QString card) {
+
 }
 
-void GameLogic::end_turn(){
+
+void GameLogic::endTurn(){
     if (skipped) { skipped = false; }
     else if (attacked) {attacked = false;}
     else {
-        add_to_player_hand(draw_card(),current_player);
+        addToPlayerHand(drawCard(),currentPlayer);
     }
-    //TODO: END GAME
-    while (!player_alive[current_player]) {
-        current_player = (PLAYER_NUM) ((current_player + 1) %player_num);
+    if (playerAliveNum() == 1) {
+        //END GAME
+    } else {
+        QJsonObject::iterator it = playerAlive.find(currentPlayer);
+        do {
+            if (++it == playerAlive.end()) it = playerAlive.begin();
+        }while (it != playerAlive.find(currentPlayer) && !(it.value().toBool()));
+        currentPlayer = it.key();
     }
-    if (players_left == 1) {
-        send_player_notif(current_player,WIN);
+}
+
+void GameLogic::updateAllUi(){
+    QJsonObject gameUiInfo;
+
+    gameUiInfo["type"] = "updateUi";
+    gameUiInfo["deckSize"] = (int) deck.size();
+    gameUiInfo["playerHand"] = playerHand;
+    gameUiInfo["playerAlive"] = playerAlive;
+    server->broadcast(gameUiInfo);
+}
+
+int GameLogic::playerAliveNum(){
+    int temp = 0;
+    for (QJsonValue alive : playerAlive) {
+        if (alive.toBool()) temp++;
+    }
+    return temp;
+}
+
+void GameLogic::receiveJson(ServerWorker *sender, const QJsonObject &json){
+    const QString type = json.value(QString("type")).toString();
+    if (sender->getPlayerName() == currentPlayer) {
+        if (type == "endTurn") endTurn();
+        if (type == "playCard") {
+            playerPlayCard(json.value("card").toString());
+        }
     }
 }

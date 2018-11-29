@@ -7,7 +7,7 @@
 #include "client.h"
 
 #include "gamelogic.h"
-#include "game_window.h"
+#include "gamewindow.h"
 
 #include <QListWidget>
 
@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    game_window* gameWindow;
+    GameWindow* gameWindow;
 private:
     // UI
     enum Window {NoWindow = 0, RequestRoom, CreateRoom, JoinRoom, Room};
@@ -51,7 +51,9 @@ private:
     Client* client;
     QString ip;
     quint16 port;
+
     QString playerName;
+
     bool isHost;
     bool isConnect;
 
@@ -71,6 +73,9 @@ private:
     void removePlayer(const QString &playerName);
     void leaveRoom();
     void forceLeaveRoom();
+
+    //Start Game
+    void startGame();
 
 private slots:
     void create_room_handler();

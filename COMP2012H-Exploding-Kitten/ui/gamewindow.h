@@ -4,20 +4,23 @@
 #include <QDialog>
 #include <QLabel>
 #include <QPushButton>
-#include <QListView>
+#include <QListWidget>
 #include "notifwindow.h"
+#include "client.h"
 #include <QtDebug>
+#include <QJsonArray>
+#include <QJsonObject>
 namespace Ui {
 class game_window;
 }
 
-class game_window : public QDialog
+class GameWindow : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit game_window(QWidget *parent = nullptr);
-    ~game_window();
+    explicit GameWindow(QWidget *parent = nullptr, Client* client = nullptr, int playerNum = 2, QString name = "Player");
+    ~GameWindow();
     NotifWindow* notifWindow;
 
 private:
@@ -32,15 +35,18 @@ private:
     QLabel *rightPlayerLabel;
     QLabel *topPlayerLabel;
     QLabel *botPlayerLabel;
+    QListWidget *handList;
+    Client* client;
 
-    QListView *handList;
+    QString playerName;
 
     //Game UI
     void setGameWindow();
-    void deleteGameWindow();
+
 private slots:
     void endTurnBtnHandler();
     void playCardBtnHandler();
+    void clientJsonReceived(const QJsonObject &json);
 };
 
 #endif // GAME_WINDOW_H

@@ -5,7 +5,12 @@
 #include "card.h"
 #include "vector"
 #include "algorithm"
-
+#include "server.h"
+#include <QtDebug>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QVector>
+#include <QObject>
 using namespace std;
 
 enum NOTIF_TYPE{
@@ -29,33 +34,52 @@ enum NOTIF_TYPE{
 static const int deck_size = INITIAL_DECK 0;
 #undef X
 
-class GameLogic
+#define CARDS(X) \
+    X(DEFUSE) \
+    X(EXPLODING_KITTEN)\
+    X(ATTACK)\
+    X(SKIP) \
+    X(SEE_THE_FUTURE)\
+    X(SHUFFLE) \
+    X(NOPE)
+
+#define CARD_COUNT(A) 1+
+#define CARD_NAME(A) #A,
+#define CARD_ENUM(A) A,
+
+enum CARD_TYPE {
+  CARDS(CARD_ENUM)
+};
+
+
+class GameLogic : public QObject
 {
+    Q_OBJECT
+    Q_DISABLE_COPY(GameLogic)
 public:
-    bool server;
-    int player_num;
-    GameLogic(bool server, int player_num);
-    ~GameLogic();
-    PLAYER_NUM current_player;
+    explicit GameLogic(Server* ser);
+    const QString cardName[CARDS(CARD_COUNT) 0] = {CARDS(CARD_NAME)};
+    Server* server;
+    QString currentPlayer;
     bool attacked;
     bool skipped;
     bool player_alive[4] = {false};
-    vector<CARD_TYPE> deck;
-    vector<CARD_TYPE> player_hand[4];
-    int players_left;
+    QVector<CARD_TYPE> deck;
+    QVector<QString> playerNames;
+    QJsonObject playerAlive;
+    QJsonObject playerHand;
+    QVector<QString> playerLeft;
+    int playersLeft;
 
-    void add_to_player_hand(CARD_TYPE card, PLAYER_NUM player);
-    CARD_TYPE draw_card();
-    void player_play_card(CARD_TYPE card, PLAYER_NUM player);
-    void end_turn();
-    bool explode(PLAYER_NUM player);
-
-
-    void send_player_hand(PLAYER_NUM player);
-    void send_player_notif(PLAYER_NUM player, NOTIF_TYPE type);
-    void get_player_move(PLAYER_NUM player);
-    void update_all_ui();
-
+    void addToPlayerHand(CARD_TYPE card, QString playerName);
+    CARD_TYPE drawCard();
+    void playerPlayCard(QString card);
+    void endTurn();
+    bool defuse(QString playerName);
+    void updateAllUi();
+    int playerAliveNum();
+public slots:
+    void receiveJson(ServerWorker *sender, const QJsonObject &json);
 };
 
 #endif // GAMELOGIC_H

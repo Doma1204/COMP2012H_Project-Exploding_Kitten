@@ -20,7 +20,7 @@ public:
 
     Player(PLAYER_NUM player);
     ~Player();
-    vector<CARD_TYPE> hand;
+//    vector<CARD_TYPE> hand;
     const PLAYER_NUM player_num;
 
 };

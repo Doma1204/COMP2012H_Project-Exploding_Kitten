@@ -15,6 +15,8 @@ public:
     explicit Server(QObject *parent = nullptr);
     QString getIP() const;
     quint16 getPort() const;
+    QVector<ServerWorker *> clients;
+
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
 signals:
@@ -22,13 +24,15 @@ signals:
     void receiveJson(ServerWorker *sender, const QJsonObject &json);
 public slots:
     void stopServer();
-private slots:
+    void startGameBroadcast();
     void broadcast(const QJsonObject &json, ServerWorker *exclude = nullptr);
+private slots:
     void jsonReceived(ServerWorker *sender, const QJsonObject &json);
     void userDisconnected(ServerWorker *sender);
+
 //    void userError(ServerWorker *sender);
 private:
-    QVector<ServerWorker *> clients;
+
     quint16 port;
     QString ip;
 //    void jsonFromLoggedOut(ServerWorker *sender, const QJsonObject &doc);

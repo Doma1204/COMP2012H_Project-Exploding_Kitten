@@ -34,23 +34,23 @@ SOURCES += \
         ui/mainwindow.cpp \
     src/player.cpp \
     src/gamelogic.cpp \
-    ui/game_window.cpp \
     server/server.cpp \
     server/client.cpp\
     main.cpp \
     server/serverworker.cpp \
-    ui/notifwindow.cpp
+    ui/notifwindow.cpp \
+    ui/gamewindow.cpp
 
 HEADERS += \
         ui/mainwindow.h \
     src/player.h \
     src/gamelogic.h \
     src/card.h \
-    ui/game_window.h \
     server/server.h \
     server/client.h \
     server/serverworker.h \
-    ui/notifwindow.h
+    ui/notifwindow.h \
+    ui/gamewindow.h
 
 FORMS += \
         ui/mainwindow.ui \

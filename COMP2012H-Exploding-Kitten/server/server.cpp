@@ -78,6 +78,20 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
     emit receiveJson(sender, json);
 }
 
+void Server::startGameBroadcast() {
+    int connected_clients = 0;
+    for (ServerWorker *worker : clients) connected_clients++;
+    if (connected_clients>4){
+        QMessageBox::information(nullptr, QString("Too Many Players"), QString("There are too many players."));
+        return;
+    }
+    qDebug("Server Start Game Broadcast");
+    QJsonObject startGameMsg;
+    startGameMsg["type"] = "startGame";
+    broadcast(startGameMsg);
+}
+
+
 void Server::userDisconnected(ServerWorker *sender) {
     clients.removeAll(sender);
     const QString player = sender->getPlayerName();

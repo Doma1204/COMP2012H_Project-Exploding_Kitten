@@ -169,7 +169,7 @@ void MainWindow::setRoomWindow() {
     if (isHost) {
         startBtn->setGeometry(150, 270, 125, 30);
         startBtn->show();
-        startBtn->disconnect();
+        connect(startBtn, &QPushButton::clicked, server, &Server::startGameBroadcast);
     }
 }
 
@@ -184,15 +184,15 @@ void MainWindow::deleteRoomWindow() {
 }
 
 void MainWindow::destroyRoom() {
-    if (client != nullptr) {
-        client->disconnectFromHost();
-        client->deleteLater();
-        client = nullptr;
-    }
     if (server != nullptr) {
         server->stopServer();
         server->deleteLater();
         server = nullptr;
+    }
+    if (client != nullptr) {
+        client->disconnectFromHost();
+        client->deleteLater();
+        client = nullptr;
     }
 }
 
@@ -272,6 +272,9 @@ void MainWindow::clientJsonReceived(const QJsonObject &json) {
     } else if (type == "playerDisconnected") {
         qDebug("Player Disconnected");
         removePlayer(json.value(QString("playerName")).toString());
+    } else if (type == "startGame") {
+        qDebug("Game Started");
+        startGame();
     }
 }
 
@@ -305,7 +308,14 @@ void MainWindow::forceLeaveRoom() {
         return;
     QMessageBox::information(this, QString("Server Disconnected"), QString("The host server is disconnected."));
     isConnect = false;
+    if (gameWindow) delete gameWindow;
     deleteRoomWindow();
     destroyRoom();
     setRequestRoomWindow();
+}
+
+void MainWindow::startGame(){
+//    if (isHost) game = new GameLogic(server);
+    gameWindow = new GameWindow(nullptr, client,playerList->count(), playerName);
+    this->hide();
 }
