@@ -312,10 +312,24 @@ void MainWindow::forceLeaveRoom() {
     deleteRoomWindow();
     destroyRoom();
     setRequestRoomWindow();
+    this->show();
 }
 
 void MainWindow::startGame(){
-//    if (isHost) game = new GameLogic(server);
-    gameWindow = new GameWindow(nullptr, client,playerList->count(), playerName);
+    if (isHost) game = new GameLogic(server);
+    QVector<QString> allPlayerNames;
+    QMap<QString,int> playerNameMap;
+    int playerNum = playerList->row((playerList->findItems(playerName, Qt::MatchExactly))[0]);
+    for(int i = 0; i < playerList->count(); ++i){
+        if (i < playerNum) {
+            playerNameMap[playerList->item(i)->text()] = i-playerNum+playerList->count();
+            qDebug() <<playerList->item(i)->text() << i-playerNum+playerList->count();
+        }else {
+            playerNameMap[playerList->item(i)->text()] = i-playerNum;
+            qDebug() <<playerList->item(i)->text() << i-playerNum;
+        }
+    }
+
+    gameWindow = new GameWindow(nullptr, client,playerList->count(), playerName,playerNameMap);
     this->hide();
 }

@@ -10,6 +10,7 @@
 #include <QtDebug>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QMap>
 namespace Ui {
 class game_window;
 }
@@ -19,7 +20,7 @@ class GameWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit GameWindow(QWidget *parent = nullptr, Client* client = nullptr, int playerNum = 2, QString name = "Player");
+    explicit GameWindow(QWidget *parent = nullptr, Client* client = nullptr, int playerNum = 2, QString name = "Player", QMap<QString,int> playerNames = QMap<QString,int>());
     ~GameWindow();
     NotifWindow* notifWindow;
 
@@ -31,17 +32,13 @@ private:
 
     QLabel *deckLabel;
     QLabel *currentPlayerLabel;
-    QLabel *leftPlayerLabel;
-    QLabel *rightPlayerLabel;
-    QLabel *topPlayerLabel;
-    QLabel *botPlayerLabel;
+    QVector<QLabel*> playerLabel;
+
     QListWidget *handList;
     Client* client;
-
+    QMap<QString,int> playerOrder;
     QString playerName;
 
-    //Game UI
-    void setGameWindow();
 
 private slots:
     void endTurnBtnHandler();

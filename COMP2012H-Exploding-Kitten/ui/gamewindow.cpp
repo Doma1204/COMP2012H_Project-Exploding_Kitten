@@ -1,10 +1,11 @@
 #include "gamewindow.h"
 #include "ui_game_window.h"
 #include <QMessageBox>
-GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString name) :
+GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString name, QMap<QString,int> playerNames) :
     QDialog(parent),
     ui(new Ui::game_window),
     client(client),
+    playerOrder(playerNames),
     playerName(name)
 {
     ui->setupUi(this);
@@ -13,34 +14,45 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     endTurnBtn = new QPushButton(QString("End Turn"),this);
     playCardBtn = new QPushButton(QString("Play Card"),this);
     deckLabel = new QLabel(QString("Deck Size: 30 Cards"),this);
-    currentPlayerLabel = new QLabel(QString("Current Player: Player 1"),this);
-    botPlayerLabel = new QLabel(QString("Player 1: 5 cards"),this);
-    leftPlayerLabel = new QLabel(QString("Player 2: 5 Cards"),this);
-    topPlayerLabel = new QLabel(QString("Player 3: 5 Cards"),this);
-    rightPlayerLabel = new QLabel(QString("Player 4: 5 Cards"),this);
+    currentPlayerLabel = new QLabel(QString("Current Player: "),this);
     handList = new QListWidget(this);
-
+    for (int i=0;i<playerNum;i++) {
+        playerLabel.push_back(new QLabel(QString("Player "),this));
+    }
+    playerLabel[0]->setGeometry(330,430,121,41);
+    switch(playerNum) {
+        case 2:
+            playerLabel[1]->setGeometry(320,30,121,41);
+            break;
+        case 3:
+            playerLabel[1]->setGeometry(185,30,121,41);
+            playerLabel[2]->setGeometry(450,30,121,41);
+            break;
+        case 4:
+            playerLabel[1]->setGeometry(50,30,121,41);
+            playerLabel[2]->setGeometry(320,30,121,41);
+            playerLabel[3]->setGeometry(580,30,131,41);
+            break;
+    }
     endTurnBtn->setGeometry(661,470,91,31);
     playCardBtn->setGeometry(661,510,91,31);
     deckLabel->setGeometry(320,280,161,31);
     currentPlayerLabel->setGeometry(320,200,161,31);
-    botPlayerLabel->setGeometry(330,430,51,41);
-    leftPlayerLabel->setGeometry(50,30,121,41);
-    topPlayerLabel->setGeometry(320,30,121,41);
-    rightPlayerLabel->setGeometry(580,30,131,41);
     handList->setGeometry(60,460,561,91);
     handList->show();
     endTurnBtn->show();
     playCardBtn->show();
     deckLabel->show();
     currentPlayerLabel->show();
-    botPlayerLabel->show();
-    leftPlayerLabel->show();
-    topPlayerLabel->show();
-    rightPlayerLabel->show();
+    for (QLabel* label : playerLabel) {
+        label->show();
+    }
     handList->show();
     handList->setFlow(QListWidget::LeftToRight);
     this->show();
+    for (int i=0;i<playerNum;i++) {
+        playerLabel[i]->setText(playerOrder.key(i,"Error")+": 5 Cards");
+    }
     connect(endTurnBtn, &QPushButton::clicked,this, &GameWindow::endTurnBtnHandler);
     connect(playCardBtn, &QPushButton::clicked,this,&GameWindow::playCardBtnHandler);
     connect(client, &Client::receiveJson, this, &GameWindow::clientJsonReceived);
@@ -51,29 +63,6 @@ GameWindow::~GameWindow()
     delete ui;
 }
 
-void GameWindow::setGameWindow(){
-    endTurnBtn->setGeometry(661,470,91,31);
-    playCardBtn->setGeometry(661,510,91,31);
-    deckLabel->setGeometry(320,280,161,31);
-    currentPlayerLabel->setGeometry(320,200,161,31);
-    botPlayerLabel->setGeometry(330,430,51,41);
-    leftPlayerLabel->setGeometry(50,30,121,41);
-    topPlayerLabel->setGeometry(320,30,121,41);
-    rightPlayerLabel->setGeometry(580,30,131,41);
-    handList->setGeometry(60,460,561,91);
-    handList->show();
-    endTurnBtn->show();
-    endTurnBtn->setAutoDefault(false);
-    playCardBtn->show();
-    deckLabel->show();
-    currentPlayerLabel->show();
-    botPlayerLabel->show();
-    leftPlayerLabel->show();
-    topPlayerLabel->show();
-    rightPlayerLabel->show();
-    handList->show();
-    this->show();
-}
 
 
 void GameWindow::endTurnBtnHandler(){
@@ -95,16 +84,9 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
     qDebug("Game Window Client Receive Json");
     const QString type = json.value(QString("type")).toString();
     if (type == "updateUi") {
-        deckLabel->setText(QString("Cards Remaining: ") + QString(json.value(QString("deckSize")).toInt()));
+        deckLabel->setText(QString("Deck: ") + QString::number(json.value(QString("deckSize")).toInt())+QString(" Cards Remaining"));
         const QJsonObject playerHand = json.value(QString("playerHand")).toObject();
-//        for (QJsonObject::const_iterator it = playerHand.begin(); it != playerHand.end();it++) {
-//            QString player = it.key();
-//            if (player == playerName) {
-
-//            } else {
-
-//            }
-//        }
+        const QJsonObject playerAlive = json.value(QString("playerAlive")).toObject();
         for (QString player : playerHand.keys()) {
             if (player == playerName) {
                 handList->clear();
@@ -113,15 +95,14 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
                     QListWidgetItem *newPlayer = new QListWidgetItem(card.toString(), handList);
                     newPlayer->setTextAlignment(Qt::AlignCenter);
                 }
-            }else {
-                playerHand.value(player).toArray().size();
             }
-
+            if (playerAlive.value(player).toBool()) {
+                playerLabel[playerOrder.value(player)]->setText(player+": "+ QString::number(playerHand.value(player).toArray().size())+ " Cards");
+            } else {
+                playerLabel[playerOrder.value(player)]->setText(player+": Exploded");
+            }
         }
-//        gameUiInfo["type"] = "updateUi";
-//        gameUiInfo["deckSize"] = QString::number(deck.size());
-//        gameUiInfo["playerHand"] = playerHand;
-//        gameUiInfo["playerAlive"] = playerAlive;
+        currentPlayerLabel->setText(QString("Current Player: ")+json.value(QString("currentPlayer")).toString());
     }
 }
 

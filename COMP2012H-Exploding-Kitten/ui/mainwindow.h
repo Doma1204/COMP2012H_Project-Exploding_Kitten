@@ -10,6 +10,7 @@
 #include "gamewindow.h"
 
 #include <QListWidget>
+#include <QMap>
 
 namespace Ui {
 class MainWindow;

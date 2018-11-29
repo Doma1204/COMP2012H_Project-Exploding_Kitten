@@ -1,9 +1,10 @@
 #include "gamelogic.h"
-
+#include <QJsonDocument>
+int myrand(int i) {return rand()% i;}
 GameLogic::GameLogic(Server* ser) :
+    server(ser),
     attacked(false),
-    skipped(false),
-    server(ser)
+    skipped(false)
 {
     for (ServerWorker *worker : server->clients) {
         playerAlive[worker->getPlayerName()] = QJsonValue(true);
@@ -18,7 +19,7 @@ GameLogic::GameLogic(Server* ser) :
     INITIAL_DECK
     #undef X
 
-    random_shuffle ( deck.begin(), deck.end() );
+    random_shuffle( deck.begin(), deck.end(),myrand );
 
     for (QString player: playerHand.keys()) {
         for (int j=0;j<INITIAL_HAND_SIZE;j++) {
@@ -26,11 +27,13 @@ GameLogic::GameLogic(Server* ser) :
         }
     }
 
-    for (int i=1;i<playersLeft;i++) {
+    for (int i=1;i<playerAliveNum();i++) {
         deck.push_back(EXPLODING_KITTEN);
     }
-    random_shuffle ( deck.begin(), deck.end() );
+    currentPlayer = playerAlive.begin().key();
+    random_shuffle( deck.begin(), deck.end() ,myrand);
     connect(server, &Server::receiveJson, this, &GameLogic::receiveJson);
+    updateAllUi();
 }
 
 CARD_TYPE GameLogic::drawCard() {
@@ -52,7 +55,9 @@ void GameLogic::addToPlayerHand(CARD_TYPE card, QString playerName){
             //TODO::lose
         }
     } else {
-        playerHand[playerName].toArray().push_back(cardName[card]);
+        QJsonArray temp = playerHand[playerName].toArray();
+        temp.push_back(cardName[card]);
+        playerHand[playerName] = temp;
     }
 }
 
@@ -93,11 +98,14 @@ void GameLogic::endTurn(){
 
 void GameLogic::updateAllUi(){
     QJsonObject gameUiInfo;
-
     gameUiInfo["type"] = "updateUi";
     gameUiInfo["deckSize"] = (int) deck.size();
     gameUiInfo["playerHand"] = playerHand;
     gameUiInfo["playerAlive"] = playerAlive;
+    gameUiInfo["currentPlayer"] = currentPlayer;
+    QJsonDocument doc(gameUiInfo);
+    QByteArray bytes = doc.toJson();
+    qDebug() << bytes;
     server->broadcast(gameUiInfo);
 }
 
@@ -116,5 +124,6 @@ void GameLogic::receiveJson(ServerWorker *sender, const QJsonObject &json){
         if (type == "playCard") {
             playerPlayCard(json.value("card").toString());
         }
+        updateAllUi();
     }
 }

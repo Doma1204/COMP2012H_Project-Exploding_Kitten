@@ -24,10 +24,10 @@ enum NOTIF_TYPE{
 #define INITIAL_HAND_SIZE 3
 
 #define INITIAL_DECK \
-    X(DEFUSE,2) \
-    X(ATTACK,3) \
+    X(DEFUSE,20) \
+    X(ATTACK,1) \
     X(SKIP,5) \
-    X(SEE_THE_FUTURE,3) \
+    X(SEE_THE_FUTURE,50) \
     X(SHUFFLE,4)
 
 #define X(a,b) b+
@@ -65,11 +65,9 @@ public:
     bool skipped;
     bool player_alive[4] = {false};
     QVector<CARD_TYPE> deck;
-    QVector<QString> playerNames;
     QJsonObject playerAlive;
     QJsonObject playerHand;
     QVector<QString> playerLeft;
-    int playersLeft;
 
     void addToPlayerHand(CARD_TYPE card, QString playerName);
     CARD_TYPE drawCard();
