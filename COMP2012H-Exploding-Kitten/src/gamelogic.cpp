@@ -6,7 +6,7 @@ GameLogic::GameLogic(Server* ser) :
     attacked(false),
     skipped(false)
 {
-    for (ServerWorker *worker : server->clients) {
+    for (ServerWorker *worker : server->getClients()) {
         playerAlive[worker->getPlayerName()] = QJsonValue(true);
         QJsonArray hand;
         playerHand[worker->getPlayerName()] = hand;

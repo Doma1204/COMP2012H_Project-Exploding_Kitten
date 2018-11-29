@@ -33,6 +33,7 @@ Server::Server(QObject *parent):
 
 QString Server::getIP() const {return ip;}
 quint16 Server::getPort() const {return port;}
+QVector<ServerWorker*> Server::getClients() const {return clients;}
 
 void Server::incomingConnection(qintptr socketDesriptor) {
     qDebug("New Player");
@@ -79,9 +80,7 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
 }
 
 void Server::startGameBroadcast() {
-    int connected_clients = 0;
-    for (ServerWorker *worker : clients) connected_clients++;
-    if (connected_clients>4){
+    if (clients.size()>4){
         QMessageBox::information(nullptr, QString("Too Many Players"), QString("There are too many players."));
         return;
     }

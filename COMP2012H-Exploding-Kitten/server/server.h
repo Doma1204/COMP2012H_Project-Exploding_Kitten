@@ -15,7 +15,7 @@ public:
     explicit Server(QObject *parent = nullptr);
     QString getIP() const;
     quint16 getPort() const;
-    QVector<ServerWorker *> clients;
+    QVector<ServerWorker*> getClients() const;
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
@@ -35,6 +35,7 @@ private:
 
     quint16 port;
     QString ip;
+    QVector<ServerWorker*> clients;
 //    void jsonFromLoggedOut(ServerWorker *sender, const QJsonObject &doc);
 //    void jsonFromLoggedIn(ServerWorker *sender, const QJsonObject &doc);
     void sendJson(ServerWorker *worker, const QJsonObject &json);
