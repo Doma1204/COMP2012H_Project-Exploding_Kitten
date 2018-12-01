@@ -3,8 +3,10 @@
 #include "server.h"
 #include "client.h"
 
-#include <QPushButton>
+#include <QFont>
+#include <QFontDatabase>
 #include <QLabel>
+#include <QPushButton>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -18,44 +20,94 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    serverNameLabel(new QLabel(QString("Server Name:"), this)),
-    serverPortLabel(new QLabel(QString("Server Port:"), this)),
-    nameLabel(new QLabel(QString("Name:"), this)),
-    playerCountLabel(new QLabel(this)),
-    serverNameDetailLabel(new QLabel(this)),
-    serverPortDetailLabel(new QLabel(this)),
+    game(nullptr),
     server(nullptr),
     client(nullptr),
     playerName(""),
+    ip(""),
+    port(0),
     isHost(false),
     isConnect(false)
 {
     ui->setupUi(this);
     this->setWindowTitle(QString("Exploding Kittens"));
-    createRoomBtn = new QPushButton(QString("Create Room") ,this);
-    joinRoomBtn = new QPushButton(QString("Join Room"), this);
-    backBtn = new QPushButton(QString("Back"), this);
-    leaveBtn = new QPushButton(QString("Leave"), this);
-    startBtn = new QPushButton(QString("Start"), this);
+    this->centralWidget()->setStyleSheet("background-image:url(\":/resource/resource/image/ExplodingKittenBackground.png\"); background-position: center;");
 
-    serverNameLineEdit = new QLineEdit(this);
-    serverPortLineEdit = new QLineEdit(this);
-    nameLineEdit = new QLineEdit(this);
+    QFont *startWindowBtnFont = new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/FEASFBRG.TTF")).at(0));
+    startWindowBtnFont->setPointSize(35);
 
-    playerList = new QListWidget(this);
+    QFont *roomWindowFont = new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Candy Beans.otf")).at(0));
+    roomWindowFont->setPointSize(15);
 
-    createRoomBtn->hide();
-    joinRoomBtn->hide();
-    backBtn->hide();
-    leaveBtn->hide();
-    startBtn->hide();
-    serverNameLabel->hide();
-    serverPortLabel->hide();
-    nameLabel->hide();
-    serverNameLineEdit->hide();
-    serverPortLineEdit->hide();
-    nameLineEdit->hide();
-    playerList->hide();
+    // Start Window
+    ui->createRoomBtn->setFont(*startWindowBtnFont);
+    ui->createRoomBtn->setStyleSheet("border: none; color: #fcdb20;");
+    ui->createRoomBtn->hide();
+
+    ui->joinRoomBtn->setFont(*startWindowBtnFont);
+    ui->joinRoomBtn->setStyleSheet("border: none; color: #fcdb20");
+    ui->joinRoomBtn->hide();
+
+    //Room Window
+    ui->serverNameLabel->setFont(*roomWindowFont);
+    ui->serverNameLabel->setStyleSheet("border:none; color: white;");
+    ui->serverNameLabel->hide();
+
+    ui->serverPortLabel->setFont(*roomWindowFont);
+    ui->serverPortLabel->setStyleSheet("border:none; color: white;");
+    ui->serverPortLabel->hide();
+
+    ui->nameLabel->setFont(*roomWindowFont);
+    ui->nameLabel->setStyleSheet("border:none; color: white;");
+    ui->nameLabel->hide();
+
+    ui->playerCountLabel->setFont(*roomWindowFont);
+    ui->playerCountLabel->setStyleSheet("border:none; color: white;");
+    ui->playerCountLabel->hide();
+
+    ui->serverNameDetailLabel->setFont(*roomWindowFont);
+    ui->serverNameDetailLabel->setStyleSheet("border:none; color: white;");
+    ui->serverNameDetailLabel->hide();
+
+    ui->serverPortDetailLabel->setFont(*roomWindowFont);
+    ui->serverPortDetailLabel->setStyleSheet("border:none; color: white;");
+    ui->serverPortDetailLabel->hide();
+
+    ui->serverNameLineEdit->hide();
+    ui->serverPortLineEdit->hide();
+    ui->nameLineEdit->hide();
+
+    ui->playerList->setFont(*roomWindowFont);
+    ui->playerList->setStyleSheet("color: white");
+    ui->playerList->hide();
+
+    roomWindowFont->setPointSize(20);
+
+    connect(ui->createRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setCreateRoomWindow();});
+    connect(ui->joinRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setJoinRoomWindow();});
+
+    ui->createBtn->setFont(*roomWindowFont);
+    ui->createBtn->setStyleSheet("border: none; color: white;");
+    connect(ui->createBtn, &QPushButton::clicked, this, &MainWindow::create_room_handler);
+    ui->createBtn->hide();
+
+    ui->backBtn->setFont(*roomWindowFont);
+    ui->backBtn->setStyleSheet("border: none; color: white;");
+    ui->backBtn->hide();
+
+    ui->joinBtn->setFont(*roomWindowFont);
+    ui->joinBtn->setStyleSheet("border: none; color: white;");
+    connect(ui->joinBtn, &QPushButton::clicked, this, &MainWindow::join_room_handler);
+    ui->joinBtn->hide();
+
+    ui->startBtn->setFont(*roomWindowFont);
+    ui->startBtn->setStyleSheet("border: none; color: white;");
+    ui->startBtn->hide();
+
+    ui->leaveBtn->setFont(*roomWindowFont);
+    ui->leaveBtn->setStyleSheet("border: none; color: white;");
+    connect(ui->leaveBtn, &QPushButton::clicked, this, &MainWindow::leaveRoom);
+    ui->leaveBtn->hide();
 
     setRequestRoomWindow();
 }
@@ -66,121 +118,92 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::setRequestRoomWindow() {
-    createRoomBtn->setGeometry(125, 170, 150, 30);
-    joinRoomBtn->setGeometry(125, 200, 150, 30);
-
-    //    createRoomBtn->setStyleSheet(QString("QPushButton{background:white}"));
-    //    joinRoomBtn->setStyleSheet(QString("QPushButton{background:white}"));
-
-    createRoomBtn->show();
-    joinRoomBtn->show();
-
-    createRoomBtn->disconnect();
-    joinRoomBtn->disconnect();
-    connect(createRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setCreateRoomWindow();});
-    connect(joinRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setJoinRoomWindow();});
+    ui->createRoomBtn->show();
+    ui->joinRoomBtn->show();
 }
 
 void MainWindow::deleteRequestRoomWindow() {
-    createRoomBtn->hide();
-    joinRoomBtn->hide();
+    ui->createRoomBtn->hide();
+    ui->joinRoomBtn->hide();
 }
 
 void MainWindow::setCreateRoomWindow() {
-    nameLabel->setGeometry(75, 85, 50, 50);
-    nameLineEdit->setGeometry(125, 100, 200, 20);
-    createRoomBtn->setGeometry(275, 270, 125, 30);
-    backBtn->setGeometry(150, 270, 125, 30);
+    ui->nameLabel->setGeometry(75, 130, 50, 20);
+    ui->nameLineEdit->setGeometry(125, 130, 200, 20);
+    ui->nameLineEdit->setFocus();
 
-    nameLabel->show();
-    nameLineEdit->show();
-    createRoomBtn->show();
-    backBtn->show();
+    ui->nameLabel->show();
+    ui->nameLineEdit->show();
+    ui->createBtn->show();
+    ui->backBtn->show();
 
-    createRoomBtn->disconnect();
-    backBtn->disconnect();
-    connect(backBtn, &QPushButton::clicked, this, [this]() {deleteCreateRoomWindow(); setRequestRoomWindow();});
-    connect(createRoomBtn, &QPushButton::clicked, this, &MainWindow::create_room_handler);
+    ui->backBtn->disconnect();
+    connect(ui->backBtn, &QPushButton::clicked, this, [this]() {deleteCreateRoomWindow(); setRequestRoomWindow();});
 }
 
 void MainWindow::deleteCreateRoomWindow() {
-    nameLabel->hide();
-    nameLineEdit->hide();
-    createRoomBtn->hide();
-    backBtn->hide();
+    ui->nameLabel->hide();
+    ui->nameLineEdit->hide();
+    ui->createBtn->hide();
+    ui->backBtn->hide();
 }
 
 void MainWindow::setJoinRoomWindow() {
-    serverNameLabel->setGeometry(50, 85, 100, 50);
-    serverPortLabel->setGeometry(60, 105, 100, 50);
-    nameLabel->setGeometry(95, 125, 50, 50);
-    serverNameLineEdit->setGeometry(140, 100, 200, 20);
-    serverPortLineEdit->setGeometry(140, 120, 200, 20);
-    nameLineEdit->setGeometry(140, 140, 200, 20);
-    joinRoomBtn->setGeometry(275, 270, 125, 30);
-    backBtn->setGeometry(150, 270, 125, 30);
+    ui->nameLabel->setGeometry(100, 180, 50, 20);
+    ui->nameLineEdit->setGeometry(150, 180, 200, 20);
 
-    serverNameLabel->show();
-    serverNameLineEdit->show();
-    serverPortLabel->show();
-    serverPortLineEdit->show();
-    nameLabel->show();
-    nameLineEdit->show();
-    joinRoomBtn->show();
-    backBtn->show();
+    ui->serverNameLineEdit->setFocus();
 
-    joinRoomBtn->disconnect();
-    backBtn->disconnect();
-    connect(backBtn, &QPushButton::clicked, this, [this]() {deleteJoinRoomWindow(); setRequestRoomWindow();});
-    connect(joinRoomBtn, &QPushButton::clicked, this, &MainWindow::join_room_handler);
+    ui->serverNameLabel->show();
+    ui->serverPortLabel->show();
+    ui->serverNameLineEdit->show();
+    ui->serverPortLineEdit->show();
+    ui->nameLabel->show();
+    ui->nameLineEdit->show();
+    ui->joinBtn->show();
+    ui->backBtn->show();
+
+    ui->backBtn->disconnect();
+    connect(ui->backBtn, &QPushButton::clicked, this, [this]() {deleteJoinRoomWindow(); setRequestRoomWindow();});
 }
 
 void MainWindow::deleteJoinRoomWindow() {
-    serverNameLabel->hide();
-    serverNameLineEdit->hide();
-    serverPortLabel->hide();
-    serverPortLineEdit->hide();
-    nameLabel->hide();
-    nameLineEdit->hide();
-    joinRoomBtn->hide();
-    backBtn->hide();
+    ui->serverNameLabel->hide();
+    ui->serverPortLabel->hide();
+    ui->serverNameLineEdit->hide();
+    ui->serverPortLineEdit->hide();
+    ui->nameLabel->hide();
+    ui->nameLineEdit->hide();
+    ui->joinBtn->hide();
+    ui->backBtn->hide();
 }
 
 void MainWindow::setRoomWindow() {
-    playerCountLabel->setGeometry(10, 5, 200, 20);
-    playerList->setGeometry(10, 25, 200, 230);
-    serverNameDetailLabel->setGeometry(220, 0, 200, 50);
-    serverPortDetailLabel->setGeometry(220, 50, 200, 50);
-    leaveBtn->setGeometry(275, 270, 125, 30);
+    ui->serverNameDetailLabel->setText("Server Name:\n" + ip);
+    ui->serverPortDetailLabel->setText("Server Port:\n" + QString::number(port));
+    ui->playerCountLabel->setText(QString("Player Count:"));;
 
-    serverNameDetailLabel->setText(QString("Server Name:\n") + ip);
-    serverPortDetailLabel->setText(QString("Server Port:\n") + QString::number(port));
-    playerCountLabel->setText(QString("Player Count:"));
-
-    playerCountLabel->show();
-    playerList->show();
-    serverNameDetailLabel->show();
-    serverPortDetailLabel->show();
-    leaveBtn->show();
-
-    leaveBtn->disconnect();
-    connect(leaveBtn, &QPushButton::clicked, this, &MainWindow::leaveRoom);
+    ui->playerCountLabel->show();
+    ui->serverNameDetailLabel->show();
+    ui->serverPortDetailLabel->show();
+    ui->playerList->show();
+    ui->leaveBtn->show();
 
     if (isHost) {
-        startBtn->setGeometry(150, 270, 125, 30);
-        startBtn->show();
-        connect(startBtn, &QPushButton::clicked, server, &Server::startGameBroadcast);
+        ui->startBtn->disconnect();
+        connect(ui->startBtn, &QPushButton::clicked, server, &Server::startGameBroadcast);
+        ui->startBtn->show();
     }
 }
 
 void MainWindow::deleteRoomWindow() {
-    playerList->clear();
-    playerList->hide();
-    playerCountLabel->hide();
-    serverNameDetailLabel->hide();
-    serverPortDetailLabel->hide();
-    leaveBtn->hide();
-    startBtn->hide();
+    ui->playerList->clear();
+    ui->playerList->hide();
+    ui->playerCountLabel->hide();
+    ui->serverNameDetailLabel->hide();
+    ui->serverPortDetailLabel->hide();
+    ui->leaveBtn->hide();
+    ui->startBtn->hide();
 }
 
 void MainWindow::destroyRoom() {
@@ -201,96 +224,7 @@ void MainWindow::joinRoom() {
     client->connectToServer(QHostAddress(ip), port);
     connect(client, &Client::receiveJson, this, &MainWindow::clientJsonReceived);
     connect(client, &Client::connected, this, &MainWindow::sendPlayerName);
-    connect(client, &Client::connected, this, [this]() {isConnect = true;});
     connect(client, &Client::disconnected, this, &MainWindow::forceLeaveRoom);
-}
-
-void MainWindow::create_room_handler() {
-    qDebug("Create Room");
-    playerName = nameLineEdit->text().simplified();
-    if (playerName.isEmpty()) {
-        QMessageBox::information(this, QString("Empty Name"), QString("Name cannot be empty"));
-        return;
-    }
-
-    server = new Server(this);
-    ip = server->getIP();
-    port = server->getPort();
-    isHost = true;
-    joinRoom();
-
-    deleteCreateRoomWindow();
-    setRoomWindow();
-}
-
-void MainWindow::join_room_handler() {
-    qDebug("Join Room");
-    ip = serverNameLineEdit->text().simplified();
-    if (ip.isEmpty()) {
-        QMessageBox::information(this, QString("Empty Server Name"), QString("Server name cannot be empty"));
-        return;
-    }
-
-    port = serverPortLineEdit->text().simplified().toUShort();
-    if (!port) {
-        QMessageBox::information(this, QString("Invalid Port"), QString("Invvalid Port"));
-        return;
-    }
-
-    playerName = nameLineEdit->text().simplified();
-    if (playerName.isEmpty()) {
-        QMessageBox::information(this, QString("Empty Name"), QString("Name cannot be empty"));
-        return;
-    }
-
-    isHost = false;
-    joinRoom();
-
-    deleteJoinRoomWindow();
-    setRoomWindow();
-}
-
-void MainWindow::sendPlayerName() {
-    qDebug("Send New Player Name");
-    QJsonObject playerNameMsg;
-    playerNameMsg["type"] = "playerName";
-    playerNameMsg["playerName"] = playerName;
-    client->sendJson(playerNameMsg);
-}
-
-void MainWindow::clientJsonReceived(const QJsonObject &json) {
-    qDebug("Client Receive Json");
-    const QString type = json.value(QString("type")).toString();
-    if (type == "requestName") {
-        sendPlayerName();
-    } else if (type == "newPlayer") {
-        qDebug("Receive New Player");
-        addPlayer(json.value(QString("playerName")).toString());
-    } else if (type == "playerList") {
-        for(QJsonValue playerName : json.value(QString("playerNames")).toArray())
-            addPlayer(playerName.toString());
-    } else if (type == "playerDisconnected") {
-        qDebug("Player Disconnected");
-        removePlayer(json.value(QString("playerName")).toString());
-    } else if (type == "startGame") {
-        qDebug("Game Started");
-        startGame();
-    }
-}
-
-void MainWindow::addPlayer(const QString &playerName) {
-    QListWidgetItem *newPlayer = new QListWidgetItem(playerName, playerList);
-    newPlayer->setTextAlignment(Qt::AlignCenter);
-    playerCountLabel->setText(QString("Player Count: ") + QString::number(playerList->count()));
-}
-
-void MainWindow::removePlayer(const QString &playerName) {
-    QList<QListWidgetItem*> players = playerList->findItems(playerName, Qt::MatchExactly);
-    for (QListWidgetItem *player : players) {
-        qDebug() << player->text();
-    }
-    delete players.takeFirst();
-    playerCountLabel->setText(QString("Player Count: ") + QString::number(playerList->count()));
 }
 
 void MainWindow::leaveRoom() {
@@ -315,21 +249,103 @@ void MainWindow::forceLeaveRoom() {
     this->show();
 }
 
+void MainWindow::addPlayer(const QString &playerName) {
+    QListWidgetItem *newPlayer = new QListWidgetItem(playerName, ui->playerList);
+    newPlayer->setTextAlignment(Qt::AlignCenter);
+    newPlayer->setFlags(newPlayer->flags() & ~Qt::ItemIsSelectable);
+    ui->playerCountLabel->setText(QString("Player Count: ") + QString::number(ui->playerList->count()));
+}
+
+void MainWindow::removePlayer(const QString &playerName) {
+    QList<QListWidgetItem*> players = ui->playerList->findItems(playerName, Qt::MatchExactly);
+    delete players.takeFirst();
+    ui->playerCountLabel->setText(QString("Player Count: ") + QString::number(ui->playerList->count()));
+}
+
 void MainWindow::startGame(){
     if (isHost) game = new GameLogic(server);
     QVector<QString> allPlayerNames;
     QMap<QString,int> playerNameMap;
-    int playerNum = playerList->row((playerList->findItems(playerName, Qt::MatchExactly))[0]);
-    for(int i = 0; i < playerList->count(); ++i){
+    int playerNum = ui->playerList->row((ui->playerList->findItems(playerName, Qt::MatchExactly))[0]);
+    for(int i = 0; i < ui->playerList->count(); ++i){
         if (i < playerNum) {
-            playerNameMap[playerList->item(i)->text()] = i-playerNum+playerList->count();
-            qDebug() <<playerList->item(i)->text() << i-playerNum+playerList->count();
+            playerNameMap[ui->playerList->item(i)->text()] = i-playerNum+ui->playerList->count();
+            qDebug() <<ui->playerList->item(i)->text() << i-playerNum+ui->playerList->count();
         }else {
-            playerNameMap[playerList->item(i)->text()] = i-playerNum;
-            qDebug() <<playerList->item(i)->text() << i-playerNum;
+            playerNameMap[ui->playerList->item(i)->text()] = i-playerNum;
+            qDebug() <<ui->playerList->item(i)->text() << i-playerNum;
         }
     }
 
-    gameWindow = new GameWindow(nullptr, client,playerList->count(), playerName,playerNameMap);
+    gameWindow = new GameWindow(nullptr, client,ui->playerList->count(), playerName,playerNameMap);
     this->hide();
 }
+
+void MainWindow::create_room_handler() {
+    playerName = ui->nameLineEdit->text().simplified();
+    if (playerName.isEmpty()) {
+        QMessageBox::information(this, QString("Empty Name"), QString("Name cannot be empty"));
+        return;
+    }
+
+    server = new Server(this);
+    ip = server->getIP();
+    port = server->getPort();
+    isHost = true;
+    joinRoom();
+
+    deleteCreateRoomWindow();
+    setRoomWindow();
+}
+
+void MainWindow::join_room_handler() {
+    ip = ui->serverNameLineEdit->text().simplified();
+    if (ip.isEmpty()) {
+        QMessageBox::information(this, QString("Empty Server Name"), QString("Server name cannot be empty"));
+        return;
+    }
+
+    port = ui->serverPortLineEdit->text().simplified().toUShort();
+    if (!port) {
+        QMessageBox::information(this, QString("Invalid Port"), QString("Invvalid Port"));
+        return;
+    }
+
+    playerName = ui->nameLineEdit->text().simplified();
+    if (playerName.isEmpty()) {
+        QMessageBox::information(this, QString("Empty Name"), QString("Name cannot be empty"));
+        return;
+    }
+
+    isHost = false;
+    joinRoom();
+}
+
+void MainWindow::sendPlayerName() {
+    QJsonObject playerNameMsg;
+    playerNameMsg["type"] = "playerName";
+    playerNameMsg["playerName"] = playerName;
+    client->sendJson(playerNameMsg);
+}
+
+void MainWindow::clientJsonReceived(const QJsonObject &json) {
+    qDebug() << json;
+    const QString type = json.value(QString("type")).toString();
+    if (type == "newPlayer") {
+        addPlayer(json.value(QString("playerName")).toString());
+    } else if (type == "playerList") {
+        for(QJsonValue playerName : json.value(QString("playerNames")).toArray())
+            addPlayer(playerName.toString());
+        isConnect = true;
+        deleteJoinRoomWindow();
+        setRoomWindow();
+    } else if (type == "playerDisconnected") {
+        removePlayer(json.value(QString("playerName")).toString());
+    } else if (type == "startGame") {
+        startGame();
+    } else if (type == "playerFull") {
+        QMessageBox::information(this, "Room Full", "The Room is Full");
+        destroyRoom();
+    }
+}
+

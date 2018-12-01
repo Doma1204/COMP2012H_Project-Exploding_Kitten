@@ -2,6 +2,7 @@
 #define GAME_WINDOW_H
 
 #include <QDialog>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QListWidget>
@@ -27,6 +28,11 @@ public:
 private:
     Ui::game_window *ui;
     //Game UI
+    QHBoxLayout *handLayout;
+
+
+
+
     QPushButton *endTurnBtn;
     QPushButton *playCardBtn;
 
@@ -39,6 +45,8 @@ private:
     Client* client;
     QMap<QString,int> playerOrder;
     QString playerName;
+
+    void newCard(QString cardType);
 
 
 private slots:

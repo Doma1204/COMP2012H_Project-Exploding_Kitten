@@ -36,6 +36,7 @@ private:
     quint16 port;
     QString ip;
     QVector<ServerWorker*> clients;
+    QVector<ServerWorker*> fullList;
 //    void jsonFromLoggedOut(ServerWorker *sender, const QJsonObject &doc);
 //    void jsonFromLoggedIn(ServerWorker *sender, const QJsonObject &doc);
     void sendJson(ServerWorker *worker, const QJsonObject &json);
