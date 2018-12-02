@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/resource">
+        <file>resource/font/Candy Beans.otf</file>
+        <file>resource/font/FEASFBRG.TTF</file>
+        <file>resource/image/ExplodingKittenBackground.png</file>
+        <file>resource/font/Twisted System.otf</file>
+        <file>resource/image/Exploding_Kitten.png</file>
+        <file>resource/image/Kitten.png</file>
+    </qresource>
+</RCC>

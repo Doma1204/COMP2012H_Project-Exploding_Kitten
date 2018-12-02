@@ -26,7 +26,6 @@ void ServerWorker::setPlayerName(const QString &playerName) {
 }
 
 void ServerWorker::disconnectFromClient() {
-    qDebug("Server side client Disconnect");
     serverSocket->disconnectFromHost();
     emit disconnectedFromClient();
 }

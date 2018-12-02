@@ -2,6 +2,7 @@
 #define GAME_WINDOW_H
 
 #include <QDialog>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QListWidget>
@@ -25,25 +26,41 @@ public:
     NotifWindow* notifWindow;
 
 private:
+    struct Player {
+        QVBoxLayout *layout;
+        QLabel *icon;
+        QLabel *name;
+        QLabel *card;
+    };
+
     Ui::game_window *ui;
     //Game UI
-    QPushButton *endTurnBtn;
-    QPushButton *playCardBtn;
+    QHBoxLayout *handLayout;
+    QSizePolicy *cardSizePolicy;
+    QFont *cardFont;
+    QFont *textFont;
 
-    QLabel *deckLabel;
-    QLabel *currentPlayerLabel;
-    QVector<QLabel*> playerLabel;
+
+
+    QVector<Player*> playerLabel;
 
     QLabel *recentMove;
-    QListWidget *handList;
     Client* client;
     QMap<QString,int> playerOrder;
     QString playerName;
 
+    Player* createNewPlayer(QString name);
+    void setPlayerCard(Player *player, int cardNum);
+    void setPlayerExploding(Player *player);
+    void setPlayerDead(Player *player);
+
+    void newCard(QString cardType);
+    void setCardStyle(QWidget *widget, QString cardType);
+    void clearLayout(QLayout *layout);
 
 private slots:
     void endTurnBtnHandler();
-    void playCardBtnHandler();
+    void playCardBtnHandler(QPushButton *card, QString currentCard);
     void clientJsonReceived(const QJsonObject &json);
 };
 
