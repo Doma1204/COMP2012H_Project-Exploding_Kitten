@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->instructionTextLabel->setFont(*roomWindowFont);
      ui->instructionTextLabel->setWordWrap(true);
     ui->instructionTextLabel->setText(
-                "Exploding Kittens is a 2-4 player online card game. \n"
+                "Exploding Kittens is a 2-5 player online card game. \n"
                 "Each player take turns playing card and drawing from the deck. \n"
                 "Each card has a different function:\n"
                 "Skip: Ends the player’s turn without drawing\n"

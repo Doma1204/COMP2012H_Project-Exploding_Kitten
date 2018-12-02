@@ -25,6 +25,7 @@ public:
     ~GameWindow();
 
     void setCardStyle(QWidget *widget, QString cardType);
+    void clearLayout(QLayout *layout);
 
 private:
     struct Player {
@@ -41,10 +42,11 @@ private:
     };
     Ui::game_window *ui;
     //Game UI
+    QDialog *notifyWindow;
     QHBoxLayout *handLayout;
-    QSizePolicy *cardSizePolicy;
-    QFont *cardFont;
-    QFont *textFont;
+    QSizePolicy cardSizePolicy;
+    QFont cardFont;
+    QFont textFont;
 
 
 
@@ -58,13 +60,11 @@ private:
 
     Player* createNewPlayer(QString name);
     void setPlayerCard(Player *player, int cardNum);
-    void setPlayerExploding(Player *player);
     void setPlayerDead(Player *player);
 
     void setCurrentCard(QString cardType);
 
     void newCard(QString cardType);
-    void clearLayout(QLayout *layout);
 
 private slots:
     void endTurnBtnHandler();

@@ -88,12 +88,12 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
 }
 
 void Server::startGameBroadcast() {
-    if (clients.size()>4){
+    if (clients.size()>5){
         QMessageBox::information(nullptr, QString("Too Many Players"), QString("There are too many players."));
         return;
     }
     if (clients.size()==1){
-        QMessageBox::information(nullptr, QString("Not Enough Players"), QString("You need 2-4 players to play."));
+        QMessageBox::information(nullptr, QString("Not Enough Players"), QString("You need 2-5 players to play."));
         return;
     }
     qDebug("Server Start Game Broadcast");

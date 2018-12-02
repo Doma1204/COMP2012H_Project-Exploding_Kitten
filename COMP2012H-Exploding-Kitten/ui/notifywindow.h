@@ -1,15 +1,14 @@
 #ifndef NOTIFYWINDOW_H
 #define NOTIFYWINDOW_H
 
-#include <QWidget>
+#include <QDialog>
 #include "gamewindow.h"
-#include <QHBoxLayout>
 
 namespace Ui {
 class NotifyWindow;
 }
 
-class NotifyWindow : public QWidget
+class NotifyWindow : public QDialog
 {
     Q_OBJECT
 
@@ -19,15 +18,13 @@ public:
         SHOW_EXPLODING_KITTEN
     };
 
-    explicit NotifyWindow(QWidget *parent = nullptr, NotifyType type = SHOW_SEE_THE_FUTURE, QJsonArray *cards = nullptr);
+    explicit NotifyWindow(QWidget *parent = nullptr, NotifyType type = SHOW_SEE_THE_FUTURE, const QJsonArray* const cards = nullptr);
     ~NotifyWindow();
 
 private:
     Ui::NotifyWindow *ui;
-//    QHBoxLayout *layout;
     GameWindow *parentWindow;
     NotifyType type;
-
 };
 
 #endif // NOTIFYWINDOW_H

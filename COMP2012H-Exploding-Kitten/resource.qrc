@@ -6,5 +6,6 @@
         <file>resource/font/Twisted System.otf</file>
         <file>resource/image/Exploding_Kitten.png</file>
         <file>resource/image/Kitten.png</file>
+        <file>resource/image/Exploded_Image.png</file>
     </qresource>
 </RCC>

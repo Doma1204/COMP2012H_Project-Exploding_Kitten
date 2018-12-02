@@ -1,6 +1,6 @@
 #include "notifywindow.h"
-#include "gamewindow.h"
 #include "ui_notifywindow.h"
+#include "gamewindow.h"
 
 #include <QSizePolicy>
 #include <QJsonArray>
@@ -9,8 +9,8 @@
 #include <QFontDatabase>
 #include <QLabel>
 
-NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, QJsonArray *cards) :
-    QWidget(parent),
+NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* const cards):
+    QDialog(parent),
     ui(new Ui::NotifyWindow),
     parentWindow(dynamic_cast<GameWindow*>(parent)),
     type(type)
@@ -19,29 +19,48 @@ NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, QJsonArray *cards) 
 
     switch (type) {
         case SHOW_SEE_THE_FUTURE: {
-            QSizePolicy *policy = new QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-            QFont *cardFont = new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Twisted System.otf")).at(0));
-            this->setGeometry(0, 0, 425, 170);
-            layout = new QHBoxLayout(this);
-            for (int i = 0; i < cards->count(); ++i) {
-                QString cardStr = cards->takeAt(i).toString();
-                QLabel *newCard = new QLabel(cardStr);
-                newCard->setSizePolicy(*policy);
+            this->setWindowTitle("See The Future");
+            QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+            QFont cardFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Twisted System.otf")).at(0));
+            cardFont.setPointSize(30);
+            this->setFixedWidth(425);
+            this->setFixedHeight(170);
+            for (int i = 0; i < cards->size(); ++i) {
+                QString cardStr = (*cards)[i].toString();
+                if (cardStr == "No Card")
+                    continue;
+
+                QLabel *newCard = new QLabel(cardStr == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardStr);
+                newCard->setSizePolicy(policy);
                 newCard->setFixedWidth(125);
                 newCard->setFixedHeight(150);
-                newCard->setFont(*cardFont);
-                parentWindow->setCardStyle(newCard, cardStr);
-                layout->addWidget(newCard);
+                newCard->setFont(cardFont);
+                newCard->setAlignment(Qt::AlignCenter);
+
+                if (cardStr == "EXPLODING_KITTEN") {
+                    newCard->setText("EXPLODING\nKITTEN");
+                    newCard->setStyleSheet("color: black; background-color: white; border: 7px solid black; border-radius: 20px");
+                } else {
+                    parentWindow->setCardStyle(newCard, cardStr);
+                }
+                ui->layout->addWidget(newCard);
             }
         }
         break;
 
         case SHOW_EXPLODING_KITTEN:
+            this->setWindowTitle("Exploded");
+            this->setFixedWidth(589);
+            this->setFixedHeight(330);
+            this->setStyleSheet("background-image:url(\":/resource/resource/image/Exploded_Image.png\"); background-position: center;");
             break;
     }
+
+    this->show();
 }
 
 NotifyWindow::~NotifyWindow()
 {
+    parentWindow->clearLayout(ui->layout);
     delete ui;
 }

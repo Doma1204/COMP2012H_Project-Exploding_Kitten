@@ -1,7 +1,9 @@
 #include "gamewindow.h"
 #include "ui_game_window.h"
+#include "notifywindow.h"
 #include <QFontDatabase>
 #include <QFont>
+#include <QVector>
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QLabel>
@@ -11,10 +13,11 @@
 GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString name, QMap<QString,int> playerNames) :
     QDialog(parent),
     ui(new Ui::game_window),
+    notifyWindow(nullptr),
     handLayout(new QHBoxLayout(this)),
-    cardSizePolicy(new QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed)),
-    cardFont(new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Twisted System.otf")).at(0))),
-    textFont(new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Candy Beans.otf")).at(0))),
+    cardSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed)),
+    cardFont(QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Twisted System.otf")).at(0))),
+    textFont(QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Candy Beans.otf")).at(0))),
     client(client),
     playerOrder(playerNames),
     playerName(name)
@@ -27,24 +30,24 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     ui->scrollArea->setStyleSheet("border: none;");
     ui->currentCardLabel->setAlignment(Qt::AlignCenter);
     setCardStyle(ui->currentCardLabel, "DEFUSE");
-    cardFont->setPointSize(30);
-    textFont->setPointSize(25);
+    cardFont.setPointSize(30);
+    textFont.setPointSize(25);
     ui->endTurnBtn->setStyleSheet("color: #B4091C; background-color: white; border: 4px solid #B4091C; border-radius: 20px");
-    ui->endTurnBtn->setFont(*cardFont);
+    ui->endTurnBtn->setFont(cardFont);
     setCardStyle(ui->endTurnBtn, "END TURN");
 
     ui->currentPlayerLabel->setAlignment(Qt::AlignCenter);
-    ui->currentPlayerLabel->setFont(*textFont);
+    ui->currentPlayerLabel->setFont(textFont);
     ui->currentPlayerLabel->setStyleSheet("color: white;");
     ui->deckLabel->setAlignment(Qt::AlignCenter);
-    ui->preMoveLabel->setFont(*textFont);
+    ui->preMoveLabel->setFont(textFont);
     ui->preMoveLabel->setStyleSheet("color: white;");
     ui->preMoveLabel->setWordWrap(true);
     ui->preMoveLabel->setAlignment(Qt::AlignCenter);
-    textFont->setPointSize(15);
-    ui->deckLabel->setFont(*textFont);
+    textFont.setPointSize(15);
+    ui->deckLabel->setFont(textFont);
     ui->deckLabel->setStyleSheet("color: white;");
-    cardFont->setPointSize(40);
+    cardFont.setPointSize(40);
 
     for (int i=0;i<playerNum;i++) {
 
@@ -64,9 +67,7 @@ GameWindow::~GameWindow()
 {
     playerLabel.clear();
     playerLabel.squeeze();
-    delete cardSizePolicy;
-    delete cardFont;
-    delete textFont;
+    delete notifyWindow;
     delete handLayout;
     delete ui;
 }
@@ -96,12 +97,13 @@ GameWindow::Player* GameWindow::createNewPlayer(QString name) {
 
     player->name = new QLabel(name);
     player->name->setAlignment(Qt::AlignCenter);
-    player->name->setFont(*textFont);
+    player->name->setFont(textFont);
     player->name->setStyleSheet("color: white;");
     player->layout->addWidget(player->name);
 
     player->card = new QLabel("3 cards");
     player->card->setAlignment(Qt::AlignCenter);
+    player->card->setFont(textFont);
     player->card->setStyleSheet("color: white; font-weight: bold; font-size: 15px;");
     player->layout->addWidget(player->card);
 
@@ -113,31 +115,28 @@ GameWindow::Player* GameWindow::createNewPlayer(QString name) {
 }
 
 void GameWindow::setPlayerCard(Player *player, int cardNum) {
-    player->card->setFont(*textFont);
     player->card->setText(QString::number(cardNum) + " Cards");
 }
 
-void GameWindow::setPlayerExploding(Player *player) {
-    // TODO: make the player icon to be exploding kitten
-}
-
 void GameWindow::setPlayerDead(Player *player) {
-    // TODO: make the player icon to a dead icon and make the text color lighter
+    player->icon->setStyleSheet("background-image:url(\":/resource/resource/image/Exploding_Kitten.png\"); background-position: center; background-repeat: no-repeat;");
+    player->name->setStyleSheet("color: #C8C8C8");
+    player->card->setStyleSheet("color: #C8C8C8");
 }
 
 void GameWindow::setCurrentCard(QString cardType) {
     setCardStyle(ui->currentCardLabel, cardType);
     ui->currentCardLabel->setText(cardType == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardType);
-    ui->currentCardLabel->setFont(*cardFont);
+    ui->currentCardLabel->setFont(cardFont);
 }
 
 void GameWindow::newCard(QString cardType) {
     QPushButton *newCard = new QPushButton(cardType == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardType);
     connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, handLayout->count(), cardType));
-    newCard->setSizePolicy(*cardSizePolicy);
+    newCard->setSizePolicy(cardSizePolicy);
     newCard->setFixedWidth(125);
     newCard->setFixedHeight(150);
-    newCard->setFont(*cardFont);
+    newCard->setFont(cardFont);
     setCardStyle(newCard, cardType);
     handLayout->addWidget(newCard);
 }
@@ -181,9 +180,8 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
         if (json.value(QString("seeTheFutureFlag")).toBool()) {
             if (json.value(QString("currentPlayer")).toString() == playerName) {
                 const QJsonArray seeTheFutureCards = json.value(QString("seeTheFuture")).toArray();
-                QMessageBox::information(nullptr, "See The Future", "Top Card: "+ seeTheFutureCards[0].toString()
-                                         +"\n Second Card: " + seeTheFutureCards[1].toString()
-                                         +"\n Third Card: " + seeTheFutureCards[2].toString());
+                delete notifyWindow;
+                notifyWindow = new NotifyWindow(this, NotifyWindow::SHOW_SEE_THE_FUTURE, &seeTheFutureCards);
             }
         }
         if (json.value("drewExplodingKitten").toBool()) {
@@ -192,13 +190,15 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
                 if (json.value("successfulDefuse").toBool()) {
                     QMessageBox::information(nullptr, "Exploding Kitten!", "You drew an Exploding Kitten! \n Luckily you have a Defuse to defuse it!");
                 }else {
-                    QMessageBox::information(nullptr, "Exploding Kitten!", "You drew an Exploding Kitten and exploded! \n You Lose!");
+                    delete notifyWindow;
+                    notifyWindow = new NotifyWindow(this, NotifyWindow::SHOW_EXPLODING_KITTEN);
                 }
             }else {
                 if (json.value("successfulDefuse").toBool()) {
                     QMessageBox::information(nullptr, "Exploding Kitten!", explodingPlayer + " drew an Exploding Kitten! \n Unfortunately, he had a Defuse to defuse it!");
                 }else {
                     QMessageBox::information(nullptr, "Exploding Kitten!", explodingPlayer + " drew an Exploding Kitten and exploded!");
+                    setPlayerDead(playerLabel[playerOrder.value(explodingPlayer)]);
                 }
             }
         }
