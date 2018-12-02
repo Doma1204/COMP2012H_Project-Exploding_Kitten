@@ -25,6 +25,7 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     this->setStyleSheet("background-color: #C83232;");
     ui->scrollAreaWidgetContents->setLayout(handLayout);
     ui->scrollArea->setStyleSheet("border: none;");
+    ui->currentCardLabel->setAlignment(Qt::AlignCenter);
     setCardStyle(ui->currentCardLabel, "DEFUSE");
     cardFont->setPointSize(30);
     textFont->setPointSize(25);
@@ -68,8 +69,10 @@ void GameWindow::endTurnBtnHandler(){
     endTurnMsg["type"] = "endTurn";
     client->sendJson(endTurnMsg);
 }
-void GameWindow::playCardBtnHandler(int currentCard){
+void GameWindow::playCardBtnHandler(int currentCard, QString currentCardString){
     qDebug() << "Card Played:" + QString::number(currentCard);
+    if (currentCardString == "DEFUSE")
+        return;
     QJsonObject playCardMsg;
     playCardMsg["type"] = "playCard";
     playCardMsg["card"] = currentCard;
@@ -122,10 +125,8 @@ void GameWindow::setCurrentCard(QString cardType) {
 }
 
 void GameWindow::newCard(QString cardType) {
-    if (cardType == "SEE_THE_FUTURE")
-        cardType = "SEE\nTHE\nFUTURE";
-    QPushButton *newCard = new QPushButton(cardType);
-    connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, handLayout->count()));
+    QPushButton *newCard = new QPushButton(cardType == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardType);
+    connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, handLayout->count(), cardType));
     newCard->setSizePolicy(*cardSizePolicy);
     newCard->setFixedWidth(125);
     newCard->setFixedHeight(150);
@@ -141,7 +142,7 @@ void GameWindow::setCardStyle(QWidget *widget, QString cardType) {
         widget->setStyleSheet("color: #F15B28; background-color: white; border: 7px solid #F15B28; border-radius: 20px");
     else if (cardType == "SKIP")
         widget->setStyleSheet("color: #2890D1; background-color: white; border: 7px solid #2890D1; border-radius: 20px");
-    else if (cardType == "SEE\nTHE\nFUTURE")
+    else if (cardType == "SEE\nTHE\nFUTURE" || cardType == "SEE_THE_FUTURE")
         widget->setStyleSheet("color: #ED167A; background-color: white; border: 7px solid #ED167A; border-radius: 20px");
     else if (cardType == "SHUFFLE")
         widget->setStyleSheet("color: #726357; background-color: white; border: 7px solid #726357; border-radius: 20px");
