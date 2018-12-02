@@ -84,6 +84,7 @@ public:
     void updateAllUi();
     int playerAliveNum();
     void stealCard(QString stealer);
+    void setNextPlayer();
 
 public slots:
     void receiveJson(ServerWorker *sender, const QJsonObject &json);
