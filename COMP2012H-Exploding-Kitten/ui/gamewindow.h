@@ -38,7 +38,7 @@ private:
     QHBoxLayout *handLayout;
     QSizePolicy *cardSizePolicy;
     QFont *cardFont;
-
+    QFont *textFont;
 
 
 
@@ -50,10 +50,13 @@ private:
     QString playerName;
 
     Player* createNewPlayer(QString name);
+    void setPlayerCard(Player *player, int cardNum);
+    void setPlayerExploding(Player *player);
+    void setPlayerDead(Player *player);
 
     void newCard(QString cardType);
     void setCardStyle(QWidget *widget, QString cardType);
-
+    void clearLayout(QLayout *layout);
 
 private slots:
     void endTurnBtnHandler();
