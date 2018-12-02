@@ -24,6 +24,8 @@ public:
     explicit GameWindow(QWidget *parent = nullptr, Client* client = nullptr, int playerNum = 2, QString name = "Player", QMap<QString,int> playerNames = QMap<QString,int>());
     ~GameWindow();
 
+    void setCardStyle(QWidget *widget, QString cardType);
+
 private:
     struct Player {
         QVBoxLayout *layout;
@@ -57,7 +59,6 @@ private:
     void setCurrentCard(QString cardType);
 
     void newCard(QString cardType);
-    void setCardStyle(QWidget *widget, QString cardType);
     void clearLayout(QLayout *layout);
 
 private slots:
