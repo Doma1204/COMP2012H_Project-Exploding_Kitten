@@ -62,7 +62,7 @@ private:
 
 private slots:
     void endTurnBtnHandler();
-    void playCardBtnHandler(QPushButton *card, QString currentCard);
+    void playCardBtnHandler(int currentCard);
     void clientJsonReceived(const QJsonObject &json);
 };
 
