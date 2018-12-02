@@ -64,7 +64,8 @@ void GameWindow::endTurnBtnHandler(){
     endTurnMsg["type"] = "endTurn";
     client->sendJson(endTurnMsg);
 }
-void GameWindow::playCardBtnHandler(QPushButton *card, QString currentCard){
+void GameWindow::playCardBtnHandler(int currentCard){
+    qDebug() << "Card Played:" + QString::number(currentCard);
     QJsonObject playCardMsg;
     playCardMsg["type"] = "playCard";
     playCardMsg["card"] = currentCard;
@@ -118,7 +119,7 @@ void GameWindow::newCard(QString cardType) {
     if (cardType == "SEE_THE_FUTURE")
         cardType = "SEE\nTHE\nFUTURE";
     QPushButton *newCard = new QPushButton(cardType);
-    connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, newCard, cardType));
+    connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, handLayout->count()));
     newCard->setSizePolicy(*cardSizePolicy);
     newCard->setFixedWidth(125);
     newCard->setFixedHeight(150);
