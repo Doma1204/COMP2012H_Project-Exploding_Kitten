@@ -36,10 +36,11 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     ui->currentPlayerLabel->setAlignment(Qt::AlignCenter);
     ui->currentPlayerLabel->setFont(*textFont);
     ui->currentPlayerLabel->setStyleSheet("color: white;");
-
+    ui->deckLabel->setAlignment(Qt::AlignCenter);
     ui->preMoveLabel->setFont(*textFont);
     ui->preMoveLabel->setStyleSheet("color: white;");
-
+    ui->preMoveLabel->setWordWrap(true);
+    ui->preMoveLabel->setAlignment(Qt::AlignCenter);
     cardFont->setPointSize(40);
 
     for (int i=0;i<playerNum;i++) {

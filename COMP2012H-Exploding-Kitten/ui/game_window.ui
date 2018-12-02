@@ -51,8 +51,8 @@
   <widget class="QPushButton" name="endTurnBtn">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>319</y>
+     <x>10</x>
+     <y>320</y>
      <width>100</width>
      <height>71</height>
     </rect>
@@ -91,7 +91,7 @@ Turn</string>
     <rect>
      <x>10</x>
      <y>290</y>
-     <width>91</width>
+     <width>101</width>
      <height>31</height>
     </rect>
    </property>
@@ -115,10 +115,10 @@ Turn</string>
   <widget class="QLabel" name="preMoveLabel">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>220</y>
-     <width>59</width>
-     <height>16</height>
+     <x>150</x>
+     <y>190</y>
+     <width>161</width>
+     <height>121</height>
     </rect>
    </property>
    <property name="text">

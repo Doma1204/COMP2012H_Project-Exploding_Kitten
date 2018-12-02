@@ -307,7 +307,7 @@ void MainWindow::join_room_handler() {
 
     port = ui->serverPortLineEdit->text().simplified().toUShort();
     if (!port) {
-        QMessageBox::information(this, QString("Invalid Port"), QString("Invvalid Port"));
+        QMessageBox::information(this, QString("Invalid Port"), QString("Invalid Port"));
         return;
     }
 
