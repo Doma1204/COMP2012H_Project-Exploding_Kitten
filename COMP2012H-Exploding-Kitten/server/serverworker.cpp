@@ -53,7 +53,7 @@ void ServerWorker::disconnectFromClient() {
 }
 
 /*
- *  void ServerWorker::disconnectFromClient()
+ *  void ServerWorker::receiveJson()
  *  @funct:  triggerd when recieving a Json object
  *  @param:  N/A
  *  @return: N/A

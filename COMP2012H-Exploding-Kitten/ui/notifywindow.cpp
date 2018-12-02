@@ -9,6 +9,14 @@
 #include <QFontDatabase>
 #include <QLabel>
 
+/*
+ *  NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* const cards):
+ *  @funct:  handler for the createRoomBtn
+ *  @param:  parent: the parent of the window, must be the GameWindow,
+ *           type: the notification type (See The Future or Exploding Kitten,
+ *           cards: See The Future cards
+ *  @return: N/A
+ */
 NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* const cards):
     QDialog(parent),
     ui(new Ui::NotifyWindow),
@@ -50,7 +58,6 @@ NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* c
                 }
                 ui->layout->addWidget(cardOrder, 0, i);
                 ui->layout->addWidget(newCard, 1, i);
-//                ui->layout->addWidget(newCard);
             }
         }
         break;
@@ -66,6 +73,12 @@ NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* c
     this->show();
 }
 
+/*
+ *  NotifyWindow::~NotifyWindow()
+ *  @funct:  NotifyWindow destructor
+ *  @param:  N/A
+ *  @return: N/A
+ */
 NotifyWindow::~NotifyWindow()
 {
     parentWindow->clearLayout(ui->layout);

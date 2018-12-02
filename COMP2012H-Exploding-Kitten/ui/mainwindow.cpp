@@ -156,7 +156,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 /*
  *  MainWindow::~MainWindow()
- *  @funct:  MainWindow destructor for the dynamically created objects
+ *  @funct:  MainWindow destructor
  *  @param:  N/A
  *  @return: N/A
  */

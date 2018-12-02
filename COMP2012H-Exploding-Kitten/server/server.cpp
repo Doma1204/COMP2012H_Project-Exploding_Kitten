@@ -25,6 +25,7 @@ Server::Server(QObject *parent):
     }
     port = serverPort();
 
+    // Find a usable IP address
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
     for (int i = 0; i < ipAddressesList.size(); ++i) {
         if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
@@ -60,6 +61,7 @@ void Server::incomingConnection(qintptr socketDesriptor) {
         return;
     }
 
+    // If the room has already full, no new player is accepted
     if (clients.size() >= 5) {
         QJsonObject playerFullMsg;
         playerFullMsg["type"] = "playerFull";
@@ -69,6 +71,7 @@ void Server::incomingConnection(qintptr socketDesriptor) {
         return;
     }
 
+    // Send the players list to the new player
     if (!clients.isEmpty()) {
         qDebug("Send player list");
         QJsonObject playerNamesMsg;
@@ -99,6 +102,7 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
     if (type == "playerName") {
         const QString playerName = json.value("playerName").toString();
 
+        // If the player has the same name with existing player, server won't allow the player to enter the room
         for (ServerWorker *worker : clients) {
             if (worker == sender)
                 continue;

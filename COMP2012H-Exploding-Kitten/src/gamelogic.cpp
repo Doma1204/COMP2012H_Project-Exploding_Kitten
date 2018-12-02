@@ -2,6 +2,13 @@
 #include <QJsonDocument>
 #include <QMessageBox>
 
+/*
+ * GameLogic is the class which control the entire game. A GameLogic object is only created in the host player side.
+ * The host player will host the server and GameLogic object, and players including the host player are clients
+ * connecting to the server. Actions from players will be sent to the server by using QJsonObject, then the server
+ * and GameLogic will process it and give the corresponding response to clients(players) and the GUI of players will
+ * be updated.
+ */
 
 /*
  *  GameLogic::GameLogic(Server* ser)

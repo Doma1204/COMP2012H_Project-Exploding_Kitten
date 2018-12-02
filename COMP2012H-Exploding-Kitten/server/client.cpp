@@ -17,8 +17,6 @@ Client::Client(QObject *parent):
     connect(clientSocket, &QTcpSocket::connected, this, &Client::connected);
     connect(clientSocket, &QTcpSocket::disconnected, this, &Client::disconnected);
     connect(clientSocket, &QTcpSocket::readyRead, this, &Client::onReadyRead);
-    // Forward the error signal, QOverload is necessary as error() is overloaded, see the Qt docs
-//    connect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::error);
 }
 
 /*

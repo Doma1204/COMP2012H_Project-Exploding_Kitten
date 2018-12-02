@@ -153,12 +153,24 @@ void GameWindow::setPlayerCard(Player *player, int cardNum) {
     player->card->setText(QString::number(cardNum) + " Cards");
 }
 
+/*
+ *  void GameWindow::setPlayerDead(Player *player)
+ *  @funct:  handles and updates the GUI for opponents
+ *  @param:  player: the opposing player who has exploded
+ *  @return: N/A
+ */
 void GameWindow::setPlayerDead(Player *player) {
     player->icon->setStyleSheet("background-image:url(\":/resource/resource/image/Exploding_Kitten.png\"); background-position: center; background-repeat: no-repeat;");
     player->name->setStyleSheet("color: #C8C8C8");
     player->card->setStyleSheet("color: #C8C8C8");
 }
 
+/*
+ *  void GameWindow::setCurrentCard(QString cardType)
+ *  @funct:  handles and updates the latest played card
+ *  @param:  cardType: the card that is played by player
+ *  @return: N/A
+ */
 void GameWindow::setCurrentCard(QString cardType) {
     setCardStyle(ui->currentCardLabel, cardType);
     ui->currentCardLabel->setText(cardType == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardType);
