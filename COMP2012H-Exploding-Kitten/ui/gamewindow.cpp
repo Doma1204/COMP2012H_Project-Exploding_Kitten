@@ -216,8 +216,6 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
                 for (QJsonValue card : playerHand.value(player).toArray()) {
                     newCard(card.toString());
                 }
-            }else {
-
             }
             if (playerAlive.value(player).toBool()) {
                 setPlayerCard(playerLabel[playerOrder.value(player)],playerHand.value(player).toArray().size());

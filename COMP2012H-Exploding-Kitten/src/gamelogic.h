@@ -40,7 +40,7 @@ class GameLogic : public QObject
     enum ATTACK_STATE {NONE, ATTACKED, ATTACKER, ATTACK_SKIP}; //for managing the Attack card interactions
 
 public:
-    explicit GameLogic(Server* ser);
+    explicit GameLogic(Server* ser); //GameLogic constructor
 
     void addToPlayerHand(CARD_TYPE card, QString playerName); //adds the card to the desired player's hand
     CARD_TYPE drawCard(); //removes the top card of the deck and returns it
@@ -61,7 +61,7 @@ private:
     QString prevMove; //the previous move (to be displayed on the GUI)
     ATTACK_STATE attacked; //for handling the Attack card interactions
     bool skipped; //for handling the Skip card interaction
-    bool gameEnded;
+    bool gameEnded; //prevents the players from playing after the game has ended
     bool seeTheFutureFlag; //flag to display the cards on the GUI
     QVector<CARD_TYPE> deck; //vector that contains the deck of cards
     QJsonObject playerAlive; //key: playerName    value: alive or not (bool)
