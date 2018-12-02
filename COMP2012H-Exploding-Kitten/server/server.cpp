@@ -9,6 +9,12 @@
 #include <QJsonValue>
 #include <QJsonArray>
 
+/*
+ *  Server::Server(QObject *parent)
+ *  @funct:  constructor for the Server class
+ *  @param:  parent: MainWindow
+ *  @return: N/A
+ */
 Server::Server(QObject *parent):
     QTcpServer(parent)
 {
@@ -32,10 +38,20 @@ Server::Server(QObject *parent):
         ip = QHostAddress(QHostAddress::LocalHost).toString();
 }
 
+/*
+ *  Server::get[...]
+ *  @funct:  getter functions for the Server object
+ */
 QString Server::getIP() const {return ip;}
 quint16 Server::getPort() const {return port;}
 QVector<ServerWorker*> Server::getClients() const {return clients;}
 
+/*
+ *  void Server::incomingConnection(qintptr socketDesriptor)
+ *  @funct:  handler for when there is a new incoming client
+ *  @param:  socketDesriptor: the client that is connecting to the server
+ *  @return: N/A
+ */
 void Server::incomingConnection(qintptr socketDesriptor) {
     qDebug("New Player");
     ServerWorker *worker = new ServerWorker(this);
@@ -69,6 +85,12 @@ void Server::incomingConnection(qintptr socketDesriptor) {
     clients.append(worker);
 }
 
+/*
+ *  void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json)
+ *  @funct:  handler for when the server recieves a QJsonObject from a client
+ *  @param:  sender: the client who sent the QJsonObject, json: the QJsonObject recieved
+ *  @return: N/A
+ */
 void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
     Q_ASSERT(sender);
 
@@ -87,6 +109,12 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
     emit receiveJson(sender, json);
 }
 
+/*
+ *  void Server::startGameBroadcast()
+ *  @funct:  function to tell the clients that the game has been started by the host
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void Server::startGameBroadcast() {
     if (clients.size()>5){
         QMessageBox::information(nullptr, QString("Too Many Players"), QString("There are too many players."));
@@ -102,7 +130,12 @@ void Server::startGameBroadcast() {
     broadcast(startGameMsg);
 }
 
-
+/*
+ *  void Server::userDisconnected(ServerWorker *sender)
+ *  @funct:  handler for when a client disconnects
+ *  @param:  worker: client that has disconnected
+ *  @return: N/A
+ */
 void Server::userDisconnected(ServerWorker *sender) {
     qDebug("user disconnect");
     if (std::find(clients.begin(), clients.end(), sender) == clients.end()) {
@@ -120,11 +153,23 @@ void Server::userDisconnected(ServerWorker *sender) {
     sender->deleteLater();
 }
 
+/*
+ *  void Server::sendJson(ServerWorker *worker, const QJsonObject &json)
+ *  @funct:  function for sending a QJsonObject from the server to the client
+ *  @param:  worker: client to be sent to, json: QJsonObject to be sent
+ *  @return: N/A
+ */
 void Server::sendJson(ServerWorker *worker, const QJsonObject &json) {
     Q_ASSERT(worker);
     worker->sendJson(json);
 }
 
+/*
+ *  void Server::broadcast(const QJsonObject &json, ServerWorker *exclude)
+ *  @funct:  function for sending a QJsonObject from the server to all the client
+ *  @param:  json: QJsonObject to be sent, exclude: optional argument for a client to be not recieve the broadcast
+ *  @return: N/A
+ */
 void Server::broadcast(const QJsonObject &json, ServerWorker *exclude) {
     qDebug("Broadcast Message");
     for (ServerWorker *worker : clients) {
@@ -135,6 +180,12 @@ void Server::broadcast(const QJsonObject &json, ServerWorker *exclude) {
     }
 }
 
+/*
+ *  void Server::stopServer()
+ *  @funct:  function for stopping the server
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void Server::stopServer() {
     for (ServerWorker *worker : clients)
         worker->disconnectFromClient();
