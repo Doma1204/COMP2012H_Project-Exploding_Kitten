@@ -43,12 +43,10 @@ private:
 
     QVector<Player*> playerLabel;
 
-    QLabel *recentMove;
     Client* client;
     QMap<QString,int> playerOrder;
     QString playerName;
     QString currentPlayer;
-
 
 
     Player* createNewPlayer(QString name);

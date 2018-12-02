@@ -17,9 +17,9 @@ using namespace std;
 
 #define INITIAL_DECK \
     X(DEFUSE,0) \
-    X(ATTACK,1) \
-    X(SKIP,1) \
-    X(SEE_THE_FUTURE,6) \
+    X(ATTACK,10) \
+    X(SKIP,10) \
+    X(SEE_THE_FUTURE,3) \
     X(SHUFFLE,1) \
     X(STEAL, 4)
 
@@ -71,7 +71,7 @@ public:
     QJsonObject playerAlive;
     QJsonObject playerHand;
     QVector<QString> playerLeft;
-
+    QString prevCard;
     bool drewExplodingKitten;
     QString explodingPlayer;
     bool successfulDefuse;

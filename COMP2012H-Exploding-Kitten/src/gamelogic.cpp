@@ -111,6 +111,7 @@ void GameLogic::playerPlayCard(QString card) {
     } else if (card == "STEAL") {
         stealCard(currentPlayer);
     }
+    prevCard = card;
 }
 
 void GameLogic::stealCard(QString stealer) {
@@ -177,6 +178,7 @@ void GameLogic::updateAllUi(){
     gameUiInfo["playerAlive"] = playerAlive;
     gameUiInfo["currentPlayer"] = currentPlayer;
     gameUiInfo["prevMove"] = prevMove;
+    gameUiInfo["prevCard"] = prevCard;
     QJsonArray seeTheFutureArr;
     if (deck.size()>=3) {
         seeTheFutureArr.append(cardName[*(deck.end()-1)]);

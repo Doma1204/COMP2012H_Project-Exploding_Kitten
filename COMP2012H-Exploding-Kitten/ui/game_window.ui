@@ -112,6 +112,19 @@ Turn</string>
     <string>Current Player</string>
    </property>
   </widget>
+  <widget class="QLabel" name="preMoveLabel">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>220</y>
+     <width>59</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>prevMoveLabel</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
