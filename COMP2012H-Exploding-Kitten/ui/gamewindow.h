@@ -5,12 +5,12 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QListWidget>
-#include "notifwindow.h"
 #include "client.h"
 #include <QtDebug>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QMap>
+#include <QMessageBox>
 namespace Ui {
 class game_window;
 }
@@ -22,7 +22,6 @@ class GameWindow : public QDialog
 public:
     explicit GameWindow(QWidget *parent = nullptr, Client* client = nullptr, int playerNum = 2, QString name = "Player", QMap<QString,int> playerNames = QMap<QString,int>());
     ~GameWindow();
-    NotifWindow* notifWindow;
 
 private:
     Ui::game_window *ui;
@@ -39,6 +38,9 @@ private:
     Client* client;
     QMap<QString,int> playerOrder;
     QString playerName;
+    QString currentPlayer;
+
+
 
 
 private slots:

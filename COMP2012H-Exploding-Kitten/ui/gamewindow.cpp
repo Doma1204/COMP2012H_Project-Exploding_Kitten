@@ -77,7 +77,12 @@ void GameWindow::playCardBtnHandler(){
     if (handList->currentItem() == nullptr) {
         QMessageBox::information(nullptr, QString("No Card Selected"), QString("Please select a card."));
         return;
-    }QJsonObject playCardMsg;
+    }
+    if (handList->currentItem()->text() == "DEFUSE") {
+        QMessageBox::information(nullptr, QString("Invalid Card Selected"), QString("You cannot play a defuse by itself."));
+        return;
+    }
+    QJsonObject playCardMsg;
     playCardMsg["type"] = "playCard";
     playCardMsg["card"] = handList->row(handList->currentItem());
     client->sendJson(playCardMsg);
@@ -114,6 +119,32 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
                                          +"\n Second Card: " + seeTheFutureCards[1].toString()
                                          +"\n Third Card: " + seeTheFutureCards[2].toString());
             }
+        }
+        if (json.value("drewExplodingKitten").toBool()) {
+            const QString explodingPlayer = json.value("explodingPlayer").toString();
+            if (explodingPlayer==playerName) {
+                if (json.value("successfulDefuse").toBool()) {
+                    QMessageBox::information(nullptr, "Exploding Kitten!", "You drew an Exploding Kitten! \n Luckily you have a Defuse to defuse it!");
+                }else {
+                    QMessageBox::information(nullptr, "Exploding Kitten!", "You drew an Exploding Kitten and exploded! \n You Lose!");
+                }
+            }else {
+                if (json.value("successfulDefuse").toBool()) {
+                    QMessageBox::information(nullptr, "Exploding Kitten!", explodingPlayer + " drew an Exploding Kitten! \n Unfortunately, he had a Defuse to defuse it!");
+                }else {
+                    QMessageBox::information(nullptr, "Exploding Kitten!", explodingPlayer + " drew an Exploding Kitten and exploded!");
+                }
+            }
+        }
+        const QString winner = json.value("winner").toString();
+        if (winner != "") {
+            if (winner == playerName) {
+                QMessageBox::information(nullptr, "Exploding Kitten!", "YOU WIN!");
+            } else {
+                QMessageBox::information(nullptr, "Exploding Kitten!", winner + " has won the game!");
+            }
+            endTurnBtn->disconnect();
+            playCardBtn->disconnect();
         }
     }
 }

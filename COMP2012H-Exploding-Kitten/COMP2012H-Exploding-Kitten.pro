@@ -38,7 +38,6 @@ SOURCES += \
     server/client.cpp\
     main.cpp \
     server/serverworker.cpp \
-    ui/notifwindow.cpp \
     ui/gamewindow.cpp
 
 HEADERS += \
@@ -49,13 +48,11 @@ HEADERS += \
     server/server.h \
     server/client.h \
     server/serverworker.h \
-    ui/notifwindow.h \
     ui/gamewindow.h
 
 FORMS += \
         ui/mainwindow.ui \
-    ui/game_window.ui \
-    ui/notifwindow.ui
+    ui/game_window.ui
 
  QT           += network widgets
 

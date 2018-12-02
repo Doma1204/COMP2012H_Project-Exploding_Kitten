@@ -17,11 +17,13 @@ using namespace std;
 #define INITIAL_HAND_SIZE 3
 
 #define INITIAL_DECK \
-    X(DEFUSE,20) \
+    X(DEFUSE,0) \
     X(ATTACK,1) \
-    X(SKIP,5) \
-    X(SEE_THE_FUTURE,10) \
-    X(SHUFFLE,4)
+    X(SKIP,1) \
+    X(SEE_THE_FUTURE,6) \
+    X(SHUFFLE,1) \
+    X(STEAL, 4)
+
 
 #define X(a,b) b+
 static const int deck_size = INITIAL_DECK 0;
@@ -34,7 +36,7 @@ static const int deck_size = INITIAL_DECK 0;
     X(SKIP) \
     X(SEE_THE_FUTURE)\
     X(SHUFFLE) \
-    X(NOPE)
+    X(STEAL)
 
 #define CARD_COUNT(A) 1+
 #define CARD_NAME(A) #A,
@@ -44,6 +46,12 @@ enum CARD_TYPE {
   CARDS(CARD_ENUM)
 };
 
+enum ATTACK_STATE {
+    NONE = 0,
+    ATTACKED,
+    ATTACKER,
+    ATTACK_SKIP
+};
 
 class GameLogic : public QObject
 {
@@ -55,7 +63,7 @@ public:
     Server* server;
     QString currentPlayer;
     QString prevMove;
-    bool attacked;
+    ATTACK_STATE attacked;
     bool skipped;
     bool player_alive[4] = {false};
     bool gameEnded;
@@ -65,6 +73,10 @@ public:
     QJsonObject playerHand;
     QVector<QString> playerLeft;
 
+    bool drewExplodingKitten;
+    QString explodingPlayer;
+    bool successfulDefuse;
+
     void addToPlayerHand(CARD_TYPE card, QString playerName);
     CARD_TYPE drawCard();
     void playerPlayCard(QString card);
@@ -72,7 +84,7 @@ public:
     bool defuse(QString playerName);
     void updateAllUi();
     int playerAliveNum();
-
+    void stealCard(QString stealer);
 
 public slots:
     void receiveJson(ServerWorker *sender, const QJsonObject &json);
