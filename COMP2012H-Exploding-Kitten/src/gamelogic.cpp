@@ -22,7 +22,7 @@ GameLogic::GameLogic(Server* ser) :
     INITIAL_DECK
     #undef X
 
-    random_shuffle( deck.begin(), deck.end(),myrand );
+    random_shuffle( deck.begin(), deck.end(),myrand);
 
     for (QString player: playerHand.keys()) {
         for (int j=0;j<INITIAL_HAND_SIZE;j++) {
@@ -145,9 +145,9 @@ void GameLogic::updateAllUi(){
         gameUiInfo["seeTheFutureFlag"] = QJsonValue(false);
     }
 
-    QJsonDocument doc(gameUiInfo);
-    QByteArray bytes = doc.toJson();
-    qDebug() << bytes;
+//    QJsonDocument doc(gameUiInfo);
+//    QByteArray bytes = doc.toJson();
+//    qDebug() << bytes;
     server->broadcast(gameUiInfo);
 }
 

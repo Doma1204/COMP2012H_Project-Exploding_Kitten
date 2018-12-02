@@ -3,8 +3,7 @@
 
 #include "player.h"
 #include "card.h"
-#include "vector"
-#include "algorithm"
+#include <algorithm>
 #include "server.h"
 #include <QtDebug>
 #include <QJsonArray>

@@ -10,6 +10,18 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>300</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -33,7 +45,7 @@
      <string>Name:</string>
     </property>
    </widget>
-      <widget class="QLabel" name="serverNameLabel">
+   <widget class="QLabel" name="serverNameLabel">
     <property name="geometry">
      <rect>
       <x>50</x>
@@ -69,7 +81,7 @@
      <string>Server Port:</string>
     </property>
    </widget>
-    <widget class="QLineEdit" name="serverPortLineEdit">
+   <widget class="QLineEdit" name="serverPortLineEdit">
     <property name="geometry">
      <rect>
       <x>150</x>
@@ -192,7 +204,7 @@
      <string>Leave</string>
     </property>
    </widget>
-  <widget class="QLabel" name="playerCountLabel">
+   <widget class="QLabel" name="playerCountLabel">
     <property name="geometry">
      <rect>
       <x>10</x>
