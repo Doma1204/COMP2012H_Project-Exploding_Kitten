@@ -56,6 +56,8 @@ private:
     void setPlayerExploding(Player *player);
     void setPlayerDead(Player *player);
 
+    void setCurrentCard(QString cardType);
+
     void newCard(QString cardType);
     void setCardStyle(QWidget *widget, QString cardType);
     void clearLayout(QLayout *layout);

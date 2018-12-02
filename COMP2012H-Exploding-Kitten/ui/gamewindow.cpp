@@ -109,6 +109,11 @@ void GameWindow::setPlayerDead(Player *player) {
     // TODO: make the player icon to a dead icon and make the text color lighter
 }
 
+void GameWindow::setCurrentCard(QString cardType) {
+    setCardStyle(ui->currentCardLabel, cardType);
+    ui->currentCardLabel->setText(cardType == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardType);
+}
+
 void GameWindow::newCard(QString cardType) {
     if (cardType == "SEE_THE_FUTURE")
         cardType = "SEE\nTHE\nFUTURE";
