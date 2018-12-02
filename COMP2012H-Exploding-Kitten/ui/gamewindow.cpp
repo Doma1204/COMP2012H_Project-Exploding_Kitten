@@ -32,8 +32,7 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     ui->endTurnBtn->setStyleSheet("color: #B4091C; background-color: white; border: 4px solid #B4091C; border-radius: 20px");
     ui->endTurnBtn->setFont(*cardFont);
     setCardStyle(ui->endTurnBtn, "END TURN");
-    ui->deckLabel->setFont(*textFont);
-    ui->deckLabel->setStyleSheet("color: white;");
+
     ui->currentPlayerLabel->setAlignment(Qt::AlignCenter);
     ui->currentPlayerLabel->setFont(*textFont);
     ui->currentPlayerLabel->setStyleSheet("color: white;");
@@ -42,6 +41,9 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     ui->preMoveLabel->setStyleSheet("color: white;");
     ui->preMoveLabel->setWordWrap(true);
     ui->preMoveLabel->setAlignment(Qt::AlignCenter);
+    textFont->setPointSize(15);
+    ui->deckLabel->setFont(*textFont);
+    ui->deckLabel->setStyleSheet("color: white;");
     cardFont->setPointSize(40);
 
     for (int i=0;i<playerNum;i++) {

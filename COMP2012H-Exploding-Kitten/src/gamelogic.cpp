@@ -96,6 +96,7 @@ void GameLogic::playerPlayCard(QString card) {
         prevMove = currentPlayer + " played see the future and viewed the top three cards of the deck.";
         seeTheFutureFlag = true;
     }else if (card == "ATTACK") {
+        qDebug()<<"ENTERING ATTACK"<<attacked;
         if (attacked == ATTACKED) {
             attacked = ATTACK_SKIP;
         }else {
@@ -138,12 +139,14 @@ void GameLogic::endTurn(){
             attacked = NONE;
         }
         prevMove = currentPlayer + " played a skip and passed his turn.";
+        setNextPlayer();
     }
     else {
         switch(attacked) {
             case ATTACKER:
                 attacked = ATTACKED;
                 prevMove = currentPlayer + " attacked and passed his turn.";
+                setNextPlayer();
                 break;
             case ATTACKED:
                 prevMove = currentPlayer + " drew a card.";
@@ -157,11 +160,15 @@ void GameLogic::endTurn(){
             case NONE:
                 prevMove = currentPlayer + " drew a card and passed.";
                 addToPlayerHand(drawCard(),currentPlayer);
+                setNextPlayer();
                 break;
         }
     }
+
+}
+
+void GameLogic::setNextPlayer() {
     if (playerAliveNum() == 1) return;
-    if (attacked == ATTACKED) return;
     QJsonObject::iterator it = playerAlive.find(currentPlayer);
     do {
         if (++it == playerAlive.end()) it = playerAlive.begin();
