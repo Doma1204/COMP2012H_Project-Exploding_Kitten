@@ -15,7 +15,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="layout"/>
+    <layout class="QGridLayout" name="layout"/>
    </item>
   </layout>
  </widget>

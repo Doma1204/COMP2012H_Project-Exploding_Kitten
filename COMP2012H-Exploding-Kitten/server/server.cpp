@@ -98,11 +98,24 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
     const QString type = json.value(QString("type")).toString();
     if (type == "playerName") {
         const QString playerName = json.value("playerName").toString();
+
+        for (ServerWorker *worker : clients) {
+            if (worker == sender)
+                continue;
+            if (worker->getPlayerName() == playerName) {
+                QJsonObject playerRepeatNameMsg;
+                playerRepeatNameMsg["type"] = "nameRepeat";
+                sendJson(sender, playerRepeatNameMsg);
+                fullList.append(sender);
+                clients.removeAll(sender);
+                return;
+            }
+        }
+
         sender->setPlayerName(playerName);
         QJsonObject newPlayerMsg;
         newPlayerMsg["type"] = "newPlayer";
         newPlayerMsg["playerName"] = playerName;
-//        sendJson(sender, newPlayerMsg);
         broadcast(newPlayerMsg);
     }
 

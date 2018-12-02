@@ -490,6 +490,9 @@ void MainWindow::clientJsonReceived(const QJsonObject &json) {
     } else if (type == "playerFull") {
         QMessageBox::information(this, "Room Full", "The Room is Full");
         destroyRoom();
+    } else if (type == "nameRepeat") {
+        QMessageBox::information(this, "Name Repeated", "The Name has been used by another player");
+        destroyRoom();
     }
 }
 

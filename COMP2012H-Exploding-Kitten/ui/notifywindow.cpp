@@ -24,11 +24,16 @@ NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* c
             QFont cardFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Twisted System.otf")).at(0));
             cardFont.setPointSize(30);
             this->setFixedWidth(425);
-            this->setFixedHeight(170);
+            this->setFixedHeight(230);
             for (int i = 0; i < cards->size(); ++i) {
                 QString cardStr = (*cards)[i].toString();
                 if (cardStr == "No Card")
                     continue;
+
+                QLabel *cardOrder = new QLabel(QString::number(i + 1));
+                cardOrder->setFont(cardFont);
+                cardOrder->setStyleSheet("color: white;");
+                cardOrder->setAlignment(Qt::AlignCenter);
 
                 QLabel *newCard = new QLabel(cardStr == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardStr);
                 newCard->setSizePolicy(policy);
@@ -43,7 +48,9 @@ NotifyWindow::NotifyWindow(QWidget *parent, NotifyType type, const QJsonArray* c
                 } else {
                     parentWindow->setCardStyle(newCard, cardStr);
                 }
-                ui->layout->addWidget(newCard);
+                ui->layout->addWidget(cardOrder, 0, i);
+                ui->layout->addWidget(newCard, 1, i);
+//                ui->layout->addWidget(newCard);
             }
         }
         break;
