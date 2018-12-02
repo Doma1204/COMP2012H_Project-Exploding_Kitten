@@ -5,7 +5,6 @@
 
 int main(int argc, char *argv[])
 {
-    std::srand(unsigned (std::time(nullptr)));
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

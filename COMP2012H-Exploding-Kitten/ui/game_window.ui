@@ -115,7 +115,7 @@ Turn</string>
   <widget class="QLabel" name="preMoveLabel">
    <property name="geometry">
     <rect>
-     <x>550</x>
+     <x>520</x>
      <y>210</y>
      <width>171</width>
      <height>121</height>

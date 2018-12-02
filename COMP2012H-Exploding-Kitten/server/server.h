@@ -20,7 +20,6 @@ public:
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
 signals:
-//    void logMessage(const QString &msg);
     void receiveJson(ServerWorker *sender, const QJsonObject &json);
 public slots:
     void stopServer();
@@ -29,16 +28,12 @@ public slots:
 private slots:
     void jsonReceived(ServerWorker *sender, const QJsonObject &json);
     void userDisconnected(ServerWorker *sender);
-
-//    void userError(ServerWorker *sender);
 private:
 
     quint16 port;
     QString ip;
     QVector<ServerWorker*> clients;
     QVector<ServerWorker*> fullList;
-//    void jsonFromLoggedOut(ServerWorker *sender, const QJsonObject &doc);
-//    void jsonFromLoggedIn(ServerWorker *sender, const QJsonObject &doc);
     void sendJson(ServerWorker *worker, const QJsonObject &json);
 };
 

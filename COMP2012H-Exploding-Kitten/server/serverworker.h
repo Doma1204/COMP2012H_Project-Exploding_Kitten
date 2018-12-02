@@ -17,8 +17,6 @@ public:
 signals:
     void jsonReceived(const QJsonObject &jsonDoc);
     void disconnectedFromClient();
-//    void error();
-//    void logMessage(const QString &msg);
 public slots:
     void disconnectFromClient();
 private slots:

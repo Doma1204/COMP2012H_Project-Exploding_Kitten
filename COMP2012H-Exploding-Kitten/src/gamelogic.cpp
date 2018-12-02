@@ -1,7 +1,6 @@
 #include "gamelogic.h"
 #include <QJsonDocument>
 #include <QMessageBox>
-int myrand(int i) {return rand()% i;}
 GameLogic::GameLogic(Server* ser) :
     server(ser),
     attacked(NONE),
@@ -17,15 +16,14 @@ GameLogic::GameLogic(Server* ser) :
         QJsonArray hand;
         playerHand[worker->getPlayerName()] = hand;
     }
-
-    #define X(a,b) \
+    #define INIT_DECK(a,b) \
         for (int i=0;i<(b);i++) { \
             deck.push_back(a); \
         }
-    INITIAL_DECK
-    #undef X
-
-    random_shuffle( deck.begin(), deck.end(),myrand);
+    INITIAL_DECK(INIT_DECK)
+    #undef INIT_DECK
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    shuffle(deck.begin(), deck.end(), std::default_random_engine(seed));
 
     for (QString player: playerHand.keys()) {
         for (int j=0;j<INITIAL_HAND_SIZE;j++) {
@@ -39,12 +37,12 @@ GameLogic::GameLogic(Server* ser) :
     }
     currentPlayer = playerAlive.begin().key();
     prevMove = currentPlayer + "'s turn to move.";
-    random_shuffle( deck.begin(), deck.end() ,myrand);
+    shuffle(deck.begin(), deck.end(), std::default_random_engine(seed));
     connect(server, &Server::receiveJson, this, &GameLogic::receiveJson);
     updateAllUi();
 }
 
-CARD_TYPE GameLogic::drawCard() {
+GameLogic::CARD_TYPE GameLogic::drawCard() {
     CARD_TYPE temp = deck.back();
     deck.pop_back();
     return temp;
@@ -52,17 +50,13 @@ CARD_TYPE GameLogic::drawCard() {
 
 void GameLogic::addToPlayerHand(CARD_TYPE card, QString playerName){
     if (card == EXPLODING_KITTEN) {
-        qDebug()<< "add to hand";
-        //TODO: let player choose:
         drewExplodingKitten = true;
         explodingPlayer = playerName;
         if (defuse(playerName)) {
-            qDebug()<< "add exploding";
             prevMove = playerName + " drew an Exploding Kitten but successfully defused it!";
             successfulDefuse = true;
             if (!deck.size()) deck.push_back(EXPLODING_KITTEN);
             else deck.insert(rand()%deck.size(),EXPLODING_KITTEN);
-            qDebug()<< "finished adding";
         } else {
             successfulDefuse = false;
             prevMove = playerName + " drew an Exploding Kitten and exploded!";
@@ -108,7 +102,8 @@ void GameLogic::playerPlayCard(QString card) {
         endTurn();
     }else if (card == "SHUFFLE") {
         prevMove = currentPlayer + " played Shuffle and shuffled the deck.";
-        random_shuffle( deck.begin(), deck.end(),myrand );
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        shuffle(deck.begin(), deck.end(), std::default_random_engine(seed));
     } else if (card == "STEAL") {
         stealCard(currentPlayer);
     }
