@@ -1,9 +1,20 @@
 #include "gamewindow.h"
 #include "ui_game_window.h"
+#include <QFontDatabase>
+#include <QFont>
 #include <QMessageBox>
+#include <QSizePolicy>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QPushButton>
+
 GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString name, QMap<QString,int> playerNames) :
     QDialog(parent),
     ui(new Ui::game_window),
+    handLayout(new QHBoxLayout(this)),
+    cardSizePolicy(new QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed)),
+    cardFont(new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Twisted System.otf")).at(0))),
+    textFont(new QFont(QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/resource/resource/font/Candy Beans.otf")).at(0))),
     client(client),
     playerOrder(playerNames),
     playerName(name)
@@ -11,53 +22,34 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     ui->setupUi(this);
     //Game UI
     this->setWindowTitle(QString("Exploding Kittens"));
-    endTurnBtn = new QPushButton(QString("End Turn"),this);
-    playCardBtn = new QPushButton(QString("Play Card"),this);
-    deckLabel = new QLabel(QString("Deck Size: 30 Cards"),this);
-    currentPlayerLabel = new QLabel(QString("Current Player: "),this);
-    handList = new QListWidget(this);
-    recentMove = new QLabel("temp",this);
+    this->setStyleSheet("background-color: #C83232;");
+    ui->scrollAreaWidgetContents->setLayout(handLayout);
+    ui->scrollArea->setStyleSheet("border: none;");
+    setCardStyle(ui->currentCardLabel, "DEFUSE");
+    cardFont->setPointSize(30);
+    textFont->setPointSize(25);
+    ui->endTurnBtn->setStyleSheet("color: #B4091C; background-color: white; border: 4px solid #B4091C; border-radius: 20px");
+    ui->endTurnBtn->setFont(*cardFont);
+    setCardStyle(ui->endTurnBtn, "END TURN");
+    ui->currentPlayerLabel->setAlignment(Qt::AlignCenter);
+    ui->currentPlayerLabel->setFont(*textFont);
+    ui->currentPlayerLabel->setStyleSheet("color: white;");
+
+
+
+    cardFont->setPointSize(40);
+
     for (int i=0;i<playerNum;i++) {
-        playerLabel.push_back(new QLabel(QString("Player "),this));
+        Player *newPlayer = createNewPlayer("Player" + QString::number(i));
+        playerLabel.push_back(newPlayer);
+        ui->playerListLayout->addLayout(newPlayer->layout);
     }
-    playerLabel[0]->setGeometry(330,430,121,41);
-    switch(playerNum) {
-        case 2:
-            playerLabel[1]->setGeometry(320,30,121,41);
-            break;
-        case 3:
-            playerLabel[1]->setGeometry(185,30,121,41);
-            playerLabel[2]->setGeometry(450,30,121,41);
-            break;
-        case 4:
-            playerLabel[1]->setGeometry(50,30,121,41);
-            playerLabel[2]->setGeometry(320,30,121,41);
-            playerLabel[3]->setGeometry(580,30,131,41);
-            break;
-    }
-    endTurnBtn->setGeometry(661,470,91,31);
-    playCardBtn->setGeometry(661,510,91,31);
-    deckLabel->setGeometry(320,280,161,31);
-    currentPlayerLabel->setGeometry(320,200,161,31);
-    handList->setGeometry(60,460,561,91);
-    recentMove->setGeometry(380, 250,161,31);
-    handList->show();
-    endTurnBtn->show();
-    playCardBtn->show();
-    deckLabel->show();
-    currentPlayerLabel->show();
-    recentMove->show();
-    for (QLabel* label : playerLabel) {
-        label->show();
-    }
-    handList->show();
-    handList->setFlow(QListWidget::LeftToRight);
+
     this->show();
-    for (int i=0;i<playerNum;i++) {
-        playerLabel[i]->setText(playerOrder.key(i,"Error")+": 5 Cards");
-    }
-    connect(endTurnBtn, &QPushButton::clicked,this, &GameWindow::endTurnBtnHandler);
-    connect(playCardBtn, &QPushButton::clicked,this,&GameWindow::playCardBtnHandler);
+
+    //    recentMove = new QLabel("temp",this);
+
+    connect(ui->endTurnBtn, &QPushButton::clicked, this, &GameWindow::endTurnBtnHandler);
     connect(client, &Client::receiveJson, this, &GameWindow::clientJsonReceived);
 }
 
@@ -73,45 +65,106 @@ void GameWindow::endTurnBtnHandler(){
     endTurnMsg["type"] = "endTurn";
     client->sendJson(endTurnMsg);
 }
-void GameWindow::playCardBtnHandler(){
-    if (handList->currentItem() == nullptr) {
-        QMessageBox::information(nullptr, QString("No Card Selected"), QString("Please select a card."));
-        return;
-    }
-    if (handList->currentItem()->text() == "DEFUSE") {
-        QMessageBox::information(nullptr, QString("Invalid Card Selected"), QString("You cannot play a defuse by itself."));
-        return;
-    }
+void GameWindow::playCardBtnHandler(QPushButton *card, QString currentCard){
     QJsonObject playCardMsg;
     playCardMsg["type"] = "playCard";
-    playCardMsg["card"] = handList->row(handList->currentItem());
+    playCardMsg["card"] = currentCard;
     client->sendJson(playCardMsg);
+}
+
+GameWindow::Player* GameWindow::createNewPlayer(QString name) {
+    Player *player = new Player;
+    player->layout = new QVBoxLayout();
+
+    player->icon = new QLabel();
+    player->icon->setStyleSheet("background-image:url(\":/resource/resource/image/Kitten.png\"); background-position: center; background-repeat: no-repeat;");
+    player->layout->addWidget(player->icon);
+
+    player->name = new QLabel(name);
+    player->name->setAlignment(Qt::AlignCenter);
+    player->name->setFont(*textFont);
+    player->name->setStyleSheet("color: white;");
+    player->layout->addWidget(player->name);
+
+    player->card = new QLabel("3 cards");
+    player->card->setAlignment(Qt::AlignCenter);
+    player->card->setStyleSheet("color: white; font-weight: bold; font-size: 15px;");
+    player->layout->addWidget(player->card);
+
+    player->layout->setStretch(0, 5);
+    player->layout->setStretch(1, 1);
+    player->layout->setStretch(2, 1);
+
+    return player;
+}
+
+void GameWindow::setPlayerCard(Player *player, int cardNum) {
+    player->card->setText(QString::number(cardNum) + " Cards");
+}
+
+void GameWindow::setPlayerExploding(Player *player) {
+    // TODO: make the player icon to be exploding kitten
+}
+
+void GameWindow::setPlayerDead(Player *player) {
+    // TODO: make the player icon to a dead icon and make the text color lighter
+}
+
+void GameWindow::newCard(QString cardType) {
+    if (cardType == "SEE_THE_FUTURE")
+        cardType = "SEE\nTHE\nFUTURE";
+    QPushButton *newCard = new QPushButton(cardType);
+    connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, newCard, cardType));
+    newCard->setSizePolicy(*cardSizePolicy);
+    newCard->setFixedWidth(125);
+    newCard->setFixedHeight(150);
+    newCard->setFont(*cardFont);
+    setCardStyle(newCard, cardType);
+    handLayout->addWidget(newCard);
+}
+
+void GameWindow::setCardStyle(QWidget *widget, QString cardType) {
+    if (cardType == "DEFUSE")
+        widget->setStyleSheet("color: #86C336; background-color: white; border: 7px solid #86C336; border-radius: 20px");
+    else if (cardType == "ATTACK")
+        widget->setStyleSheet("color: #F15B28; background-color: white; border: 7px solid #F15B28; border-radius: 20px");
+    else if (cardType == "SKIP")
+        widget->setStyleSheet("color: #2890D1; background-color: white; border: 7px solid #2890D1; border-radius: 20px");
+    else if (cardType == "SEE\nTHE\nFUTURE")
+        widget->setStyleSheet("color: #ED167A; background-color: white; border: 7px solid #ED167A; border-radius: 20px");
+    else if (cardType == "SHUFFLE")
+        widget->setStyleSheet("color: #726357; background-color: white; border: 7px solid #726357; border-radius: 20px");
+}
+
+void GameWindow::clearLayout(QLayout *layout) {
+    while (QLayoutItem *item = layout->takeAt(0)) {
+        if (QWidget *widget = item->widget())
+            widget->deleteLater();
+    }
 }
 
 void GameWindow::clientJsonReceived(const QJsonObject &json) {
     qDebug("Game Window Client Receive Json");
     const QString type = json.value(QString("type")).toString();
     if (type == "updateUi") {
-        deckLabel->setText(QString("Deck: ") + QString::number(json.value(QString("deckSize")).toInt())+QString(" Cards Remaining"));
+        ui->deckLabel->setText(QString::number(json.value(QString("deckSize")).toInt()) + " Cards Left");
         const QJsonObject playerHand = json.value(QString("playerHand")).toObject();
         const QJsonObject playerAlive = json.value(QString("playerAlive")).toObject();
         for (QString player : playerHand.keys()) {
             if (player == playerName) {
-                handList->clear();
+                clearLayout(handLayout);
                 for (QJsonValue card : playerHand.value(player).toArray()) {
-                    card.toString();
-                    QListWidgetItem *newPlayer = new QListWidgetItem(card.toString(), handList);
-                    newPlayer->setTextAlignment(Qt::AlignCenter);
+                    newCard(card.toString());
                 }
             }
-            if (playerAlive.value(player).toBool()) {
-                playerLabel[playerOrder.value(player)]->setText(player+": "+ QString::number(playerHand.value(player).toArray().size())+ " Cards");
-            } else {
-                playerLabel[playerOrder.value(player)]->setText(player+": Exploded");
-            }
+//            if (playerAlive.value(player).toBool()) {
+//                playerLabel[playerOrder.value(player)]->setText(player+": "+ QString::number(playerHand.value(player).toArray().size())+ " Cards");
+//            } else {
+//                playerLabel[playerOrder.value(player)]->setText(player+": Exploded");
+//            }
         }
-        currentPlayerLabel->setText(QString("Current Player: ")+json.value(QString("currentPlayer")).toString());
-        recentMove->setText(json.value("prevMove").toString());
+        ui->currentPlayerLabel->setText("Current Player:\n" + json.value("currentPlayer").toString());
+//        recentMove->setText(json.value("prevMove").toString());
         if (json.value(QString("seeTheFutureFlag")).toBool()) {
             if (json.value(QString("currentPlayer")).toString() == playerName) {
                 const QJsonArray seeTheFutureCards = json.value(QString("seeTheFuture")).toArray();

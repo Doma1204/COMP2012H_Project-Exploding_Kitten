@@ -25,7 +25,7 @@ GameLogic::GameLogic(Server* ser) :
     INITIAL_DECK
     #undef X
 
-    random_shuffle( deck.begin(), deck.end(),myrand );
+    random_shuffle( deck.begin(), deck.end(),myrand);
 
     for (QString player: playerHand.keys()) {
         for (int j=0;j<INITIAL_HAND_SIZE;j++) {

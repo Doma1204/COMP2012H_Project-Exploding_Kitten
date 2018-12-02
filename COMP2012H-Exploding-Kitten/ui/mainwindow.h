@@ -28,32 +28,14 @@ private:
     // UI
     enum Window {NoWindow = 0, RequestRoom, CreateRoom, JoinRoom, Room};
     Ui::MainWindow *ui;
-    QPushButton *createRoomBtn;
-    QPushButton *joinRoomBtn;
-    QPushButton *backBtn;
-    QPushButton *leaveBtn;
-    QPushButton *startBtn;
-
-    QLabel *serverNameLabel;
-    QLabel *serverPortLabel;
-    QLabel *nameLabel;
-    QLabel *playerCountLabel;
-    QLabel *serverNameDetailLabel;
-    QLabel *serverPortDetailLabel;
-
-    QLineEdit *serverNameLineEdit;
-    QLineEdit *serverPortLineEdit;
-    QLineEdit *nameLineEdit;
-
-    QListWidget *playerList;
 
     GameLogic* game;
     Server* server;
     Client* client;
-    QString ip;
-    quint16 port;
 
     QString playerName;
+    QString ip;
+    quint16 port;
 
     bool isHost;
     bool isConnect;
@@ -70,10 +52,10 @@ private:
 
     void destroyRoom();
     void joinRoom();
-    void addPlayer(const QString &playerName);
-    void removePlayer(const QString &playerName);
     void leaveRoom();
     void forceLeaveRoom();
+    void addPlayer(const QString &playerName);
+    void removePlayer(const QString &playerName);
 
     //Start Game
     void startGame();

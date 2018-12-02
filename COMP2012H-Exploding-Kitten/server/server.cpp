@@ -1,5 +1,6 @@
 #include "server.h"
 #include "serverworker.h"
+#include <algorithm>
 
 #include <QNetworkInterface>
 #include <QMessageBox>
@@ -43,6 +44,15 @@ void Server::incomingConnection(qintptr socketDesriptor) {
         return;
     }
 
+    if (clients.size() >= 5) {
+        QJsonObject playerFullMsg;
+        playerFullMsg["type"] = "playerFull";
+        sendJson(worker, playerFullMsg);
+        connect(worker, &ServerWorker::disconnectedFromClient, this, std::bind(&Server::userDisconnected, this, worker));
+        qDebug() << fullList;
+        return;
+    }
+
     if (!clients.isEmpty()) {
         qDebug("Send player list");
         QJsonObject playerNamesMsg;
@@ -65,9 +75,7 @@ void Server::jsonReceived(ServerWorker *sender, const QJsonObject &json) {
     qDebug("Server Receive a Client Json");
     const QString type = json.value(QString("type")).toString();
     if (type == "playerName") {
-        qDebug("player name");
         const QString playerName = json.value("playerName").toString();
-        qDebug() << playerName;
         sender->setPlayerName(playerName);
         QJsonObject newPlayerMsg;
         newPlayerMsg["type"] = "newPlayer";
@@ -96,6 +104,11 @@ void Server::startGameBroadcast() {
 
 
 void Server::userDisconnected(ServerWorker *sender) {
+    qDebug("user disconnect");
+    if (std::find(clients.begin(), clients.end(), sender) == clients.end()) {
+        fullList.removeAll(sender);
+        return;
+    }
     clients.removeAll(sender);
     const QString player = sender->getPlayerName();
     if (!player.isEmpty()) {
