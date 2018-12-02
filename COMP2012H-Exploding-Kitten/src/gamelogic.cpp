@@ -1,7 +1,14 @@
 #include "gamelogic.h"
 #include <QJsonDocument>
 #include <QMessageBox>
-int myrand(int i) {return rand()% i;}
+
+
+/*
+ *  GameLogic::GameLogic(Server* ser)
+ *  @funct:  constructor of GameLogic, initializes starting conditions of the game
+ *  @param:  ser: pointer to the server object
+ *  @return: N/A
+ */
 GameLogic::GameLogic(Server* ser) :
     server(ser),
     attacked(NONE),
@@ -13,70 +20,89 @@ GameLogic::GameLogic(Server* ser) :
     successfulDefuse(false)
 {
     for (ServerWorker *worker : server->getClients()) {
-        playerAlive[worker->getPlayerName()] = QJsonValue(true);
+        playerAlive[worker->getPlayerName()] = QJsonValue(true); //Initializing playerAlive
         QJsonArray hand;
-        playerHand[worker->getPlayerName()] = hand;
+        playerHand[worker->getPlayerName()] = hand; //Initializing playerHand
     }
-
-    #define X(a,b) \
+    //Macro for initializing the deck
+    #define INIT_DECK(a,b) \
         for (int i=0;i<(b);i++) { \
             deck.push_back(a); \
         }
-    INITIAL_DECK
-    #undef X
+    INITIAL_DECK(INIT_DECK)
+    #undef INIT_DECK
 
-    random_shuffle( deck.begin(), deck.end(),myrand);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    shuffle(deck.begin(), deck.end(), std::default_random_engine(seed)); //Shuffling the deck
 
     for (QString player: playerHand.keys()) {
         for (int j=0;j<INITIAL_HAND_SIZE;j++) {
-            addToPlayerHand(drawCard(),player);
+            addToPlayerHand(drawCard(),player); //Drawing the cards for each player for their initial hand
         }
-        addToPlayerHand(DEFUSE,player);
+        addToPlayerHand(DEFUSE,player); //Guarenteed Defuse at the start
     }
 
     for (int i=1;i<playerAliveNum();i++) {
-        deck.push_back(EXPLODING_KITTEN);
+        deck.push_back(EXPLODING_KITTEN); //adding Exploding Kitten cards to the deck
     }
-    currentPlayer = playerAlive.begin().key();
-    prevMove = currentPlayer + "'s turn to move.";
-    random_shuffle( deck.begin(), deck.end() ,myrand);
+    currentPlayer = playerAlive.begin().key();      //initializing currentPlayer
+    prevMove = currentPlayer + "'s turn to move.";  //initializing prevMove for GUI purposes
+    shuffle(deck.begin(), deck.end(), std::default_random_engine(seed)); //shuffling the deck (after adding the Exploding Kittens)
     connect(server, &Server::receiveJson, this, &GameLogic::receiveJson);
-    updateAllUi();
+    updateAllUi(); //sending the initial UI information
 }
 
-CARD_TYPE GameLogic::drawCard() {
+
+/*
+ *  GameLogic::CARD_TYPE GameLogic::drawCard()
+ *  @funct:  draws and returns the top card of the deck
+ *  @param:  N/A
+ *  @return: the CARD_TYPE enum corresponding to the card drawn
+ */
+GameLogic::CARD_TYPE GameLogic::drawCard() {
     CARD_TYPE temp = deck.back();
     deck.pop_back();
     return temp;
 }
 
+
+/*
+ *  void GameLogic::addToPlayerHand(CARD_TYPE card, QString playerName)
+ *  @funct:  adds the desired card to the target player's hand
+ *  @param:  card: the desired card, playerName: target player
+ *  @return: N/A
+ */
 void GameLogic::addToPlayerHand(CARD_TYPE card, QString playerName){
     if (card == EXPLODING_KITTEN) {
-        qDebug()<< "add to hand";
-        //TODO: let player choose:
         drewExplodingKitten = true;
         explodingPlayer = playerName;
         if (defuse(playerName)) {
-            qDebug()<< "add exploding";
+            //player successfully defuses the Exploding Kitten
             prevMove = playerName + " drew an Exploding Kitten but successfully defused it!";
             successfulDefuse = true;
             if (!deck.size()) deck.push_back(EXPLODING_KITTEN);
             else deck.insert(rand()%deck.size(),EXPLODING_KITTEN);
-            qDebug()<< "finished adding";
         } else {
+            //player does not defuse the Exploding Kitten (they lose)
             successfulDefuse = false;
             prevMove = playerName + " drew an Exploding Kitten and exploded!";
             playerAlive[playerName] = QJsonValue(false);
         }
     } else {
+        //otherwise just add the card to their hand
         QJsonArray temp = playerHand[playerName].toArray();
         temp.push_back(cardName[card]);
         playerHand[playerName] = temp;
     }
 }
 
+/*
+ *  bool GameLogic::defuse(QString playerName)
+ *  @funct:  checks the target player's hand for Defuses, if they have one, play it
+ *  @param:  playerName: target player
+ *  @return: true: successful defuse, false: unsuccessful defuse
+ */
 bool GameLogic::defuse(QString playerName) {
-    qDebug() << "enter defuse";
     bool has_defuse = false;
     QJsonArray temp = playerHand[playerName].toArray();
     for (int i = 0; i < temp.count();i++) {
@@ -90,10 +116,15 @@ bool GameLogic::defuse(QString playerName) {
     return has_defuse;
 }
 
-
+/*
+ *  void GameLogic::playerPlayCard(QString card)
+ *  @funct:  handles the card effects after the current player plays it
+ *  @param:  card: name of the card played
+ *  @return: N/A
+ */
 void GameLogic::playerPlayCard(QString card) {
     if (card == "SEE_THE_FUTURE") {
-        prevMove = currentPlayer + " played see the future and viewed the top three cards of the deck.";
+        prevMove = currentPlayer + " played See The Future and viewed the top three cards of the deck.";
         seeTheFutureFlag = true;
     }else if (card == "ATTACK") {
         qDebug()<<"ENTERING ATTACK"<<attacked;
@@ -107,14 +138,21 @@ void GameLogic::playerPlayCard(QString card) {
         skipped = true;
         endTurn();
     }else if (card == "SHUFFLE") {
-        prevMove = currentPlayer + " shuffled the deck.";
-        random_shuffle( deck.begin(), deck.end(),myrand );
+        prevMove = currentPlayer + " played Shuffle and shuffled the deck.";
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        shuffle(deck.begin(), deck.end(), std::default_random_engine(seed));
     } else if (card == "STEAL") {
         stealCard(currentPlayer);
     }
     prevCard = card;
 }
 
+/*
+ *  void GameLogic::stealCard(QString stealer)
+ *  @funct:  handles the Steal card interactions, steal from the next player
+ *  @param:  stealer: the player who played the Steal card
+ *  @return: N/A
+ */
 void GameLogic::stealCard(QString stealer) {
     QJsonObject::iterator it = playerAlive.find(currentPlayer);
     do {
@@ -132,14 +170,22 @@ void GameLogic::stealCard(QString stealer) {
     playerHand[it.key()] = targetHand;
 }
 
+/*
+ *  void GameLogic::endTurn()
+ *  @funct:  ends the current player's turn, drawing the card (if applicable), and passing the turn to the next player
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void GameLogic::endTurn(){
     if (skipped) {
         skipped = false;
         if (attacked == ATTACKED) {
             attacked = NONE;
+        }else {
+            setNextPlayer();
         }
         prevMove = currentPlayer + " played a skip and passed his turn.";
-        setNextPlayer();
+
     }
     else {
         switch(attacked) {
@@ -167,6 +213,12 @@ void GameLogic::endTurn(){
 
 }
 
+/*
+ *  void GameLogic::setNextPlayer()
+ *  @funct:  finds the next player still alive and sets them to be the currentPlayer
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void GameLogic::setNextPlayer() {
     if (playerAliveNum() == 1) return;
     QJsonObject::iterator it = playerAlive.find(currentPlayer);
@@ -176,6 +228,12 @@ void GameLogic::setNextPlayer() {
     currentPlayer = it.key();
 }
 
+/*
+ *  void GameLogic::updateAllUi()
+ *  @funct:  broadcasts a QJson Object of all of the UI information to the clients
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void GameLogic::updateAllUi(){
     if (gameEnded) return;
     QJsonObject gameUiInfo;
@@ -227,6 +285,12 @@ void GameLogic::updateAllUi(){
 
 }
 
+/*
+ *  int GameLogic::playerAliveNum()
+ *  @funct:  counts the number of players still alive
+ *  @param:  N/A
+ *  @return: int: number of alive players
+ */
 int GameLogic::playerAliveNum(){
     int temp = 0;
     for (QJsonValue alive : playerAlive) {
@@ -235,6 +299,12 @@ int GameLogic::playerAliveNum(){
     return temp;
 }
 
+/*
+ *  void GameLogic::receiveJson(ServerWorker *sender, const QJsonObject &json)
+ *  @funct:  recieve handler for when the server receives the player's move choices from the clients
+ *  @param:  sender: the client who sent the information, json: the QJson object containing the information
+ *  @return: N/A
+ */
 void GameLogic::receiveJson(ServerWorker *sender, const QJsonObject &json){
     const QString type = json.value(QString("type")).toString();
     if (sender->getPlayerName() == currentPlayer) {

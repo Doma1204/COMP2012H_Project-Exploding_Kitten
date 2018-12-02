@@ -32,7 +32,6 @@ CONFIG += c++11
 
 SOURCES += \
         ui/mainwindow.cpp \
-    src/player.cpp \
     src/gamelogic.cpp \
     server/server.cpp \
     server/client.cpp\
@@ -43,9 +42,7 @@ SOURCES += \
 
 HEADERS += \
         ui/mainwindow.h \
-    src/player.h \
     src/gamelogic.h \
-    src/card.h \
     server/server.h \
     server/client.h \
     server/serverworker.h \

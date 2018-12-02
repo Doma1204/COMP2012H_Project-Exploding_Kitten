@@ -32,8 +32,13 @@ private:
         QLabel *icon;
         QLabel *name;
         QLabel *card;
+        ~Player(){
+            delete layout;
+            delete icon;
+            delete name;
+            delete card;
+        }
     };
-
     Ui::game_window *ui;
     //Game UI
     QHBoxLayout *handLayout;

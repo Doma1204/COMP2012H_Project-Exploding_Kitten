@@ -62,9 +62,14 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
 
 GameWindow::~GameWindow()
 {
+    playerLabel.clear();
+    playerLabel.squeeze();
+    delete cardSizePolicy;
+    delete cardFont;
+    delete textFont;
+    delete handLayout;
     delete ui;
 }
-
 
 void GameWindow::endTurnBtnHandler(){
     QJsonObject endTurnMsg;
@@ -211,8 +216,6 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
                 for (QJsonValue card : playerHand.value(player).toArray()) {
                     newCard(card.toString());
                 }
-            }else {
-
             }
             if (playerAlive.value(player).toBool()) {
                 setPlayerCard(playerLabel[playerOrder.value(player)],playerHand.value(player).toArray().size());
