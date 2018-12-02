@@ -17,6 +17,12 @@
 #include <QJsonValue>
 #include <QJsonArray>
 
+/*
+ *  MainWindow::MainWindow(QWidget *parent)
+ *  @funct:  creates the GameWindow object and initializes the GUI
+ *  @param:  parent: nullptr
+ *  @return: N/A
+ */
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -148,6 +154,28 @@ MainWindow::MainWindow(QWidget *parent) :
     delete roomWindowFont;
 }
 
+/*
+ *  MainWindow::~MainWindow()
+ *  @funct:  MainWindow destructor for the dynamically created objects
+ *  @param:  N/A
+ *  @return: N/A
+ */
+MainWindow::~MainWindow()
+{
+    ui->playerList->clear();
+    delete gameWindow;
+    delete game;
+    delete server;
+    delete client;
+    delete ui;
+}
+
+/*
+ *  void MainWindow::set[...]Window()/void MainWindow::delete[...]Window()
+ *  @funct:  sets and resets the GUI for different windows
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::setInstructionWindow(){
     ui->instructionBackBtn->show();
     ui->instructionLabel->show();
@@ -159,22 +187,12 @@ void MainWindow::deleteInstructionWindow(){
     ui->instructionTextLabel->hide();
 }
 
-MainWindow::~MainWindow()
-{
-    ui->playerList->clear();
-    delete gameWindow;
-    delete game;
-    delete server;
-    delete client;
-    delete ui;
-}
 
 void MainWindow::setRequestRoomWindow() {
     ui->createRoomBtn->show();
     ui->joinRoomBtn->show();
     ui->instructionBtn->show();
 }
-
 void MainWindow::deleteRequestRoomWindow() {
     ui->createRoomBtn->hide();
     ui->joinRoomBtn->hide();
@@ -194,7 +212,6 @@ void MainWindow::setCreateRoomWindow() {
     ui->backBtn->disconnect();
     connect(ui->backBtn, &QPushButton::clicked, this, [this]() {deleteCreateRoomWindow(); setRequestRoomWindow();});
 }
-
 void MainWindow::deleteCreateRoomWindow() {
     ui->nameLabel->hide();
     ui->nameLineEdit->hide();
@@ -220,7 +237,6 @@ void MainWindow::setJoinRoomWindow() {
     ui->backBtn->disconnect();
     connect(ui->backBtn, &QPushButton::clicked, this, [this]() {deleteJoinRoomWindow(); setRequestRoomWindow();});
 }
-
 void MainWindow::deleteJoinRoomWindow() {
     ui->serverNameLabel->hide();
     ui->serverPortLabel->hide();
@@ -249,7 +265,6 @@ void MainWindow::setRoomWindow() {
         ui->startBtn->show();
     }
 }
-
 void MainWindow::deleteRoomWindow() {
     ui->playerList->clear();
     ui->playerList->hide();
@@ -260,6 +275,12 @@ void MainWindow::deleteRoomWindow() {
     ui->startBtn->hide();
 }
 
+/*
+ *  void MainWindow::destroyRoom()
+ *  @funct:  deletes the room.
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::destroyRoom() {
     if (server != nullptr) {
         server->stopServer();
@@ -273,6 +294,12 @@ void MainWindow::destroyRoom() {
     }
 }
 
+/*
+ *  void MainWindow::joinRoom()
+ *  @funct:  joins the room, connecting the client to the server
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::joinRoom() {
     client = new Client(this);
     client->connectToServer(QHostAddress(ip), port);
@@ -281,6 +308,12 @@ void MainWindow::joinRoom() {
     connect(client, &Client::disconnected, this, &MainWindow::forceLeaveRoom);
 }
 
+/*
+ *  void MainWindow::leaveRoom()
+ *  @funct:  for leaving the room
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::leaveRoom() {
     QMessageBox::StandardButton reply = QMessageBox::question(this, QString("Leave Room"), QString("Are you sure to leave the room?"));
     if (reply == QMessageBox::Yes) {
@@ -299,6 +332,12 @@ void MainWindow::leaveRoomNoPrompt() {
     setRequestRoomWindow();
 }
 
+/*
+ *  void MainWindow::forceLeaveRoom()
+ *  @funct:  if the host exists the room, all others will be forced out of the room
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::forceLeaveRoom() {
     if (!isConnect)
         return;
@@ -311,6 +350,12 @@ void MainWindow::forceLeaveRoom() {
     this->show();
 }
 
+/*
+ *  void MainWindow::addPlayer(const QString &playerName)
+ *  @funct:  adding the player to the room
+ *  @param:  playerName: name of the player to be added
+ *  @return: N/A
+ */
 void MainWindow::addPlayer(const QString &playerName) {
     QListWidgetItem *newPlayer = new QListWidgetItem(playerName, ui->playerList);
     newPlayer->setTextAlignment(Qt::AlignCenter);
@@ -318,12 +363,24 @@ void MainWindow::addPlayer(const QString &playerName) {
     ui->playerCountLabel->setText(QString("Player Count: ") + QString::number(ui->playerList->count()));
 }
 
+/*
+ *  void MainWindow::removePlayer(const QString &playerName)
+ *  @funct:  removes the player to the room
+ *  @param:  playerName: name of the player to be removed
+ *  @return: N/A
+ */
 void MainWindow::removePlayer(const QString &playerName) {
     QList<QListWidgetItem*> players = ui->playerList->findItems(playerName, Qt::MatchExactly);
     delete players.takeFirst();
     ui->playerCountLabel->setText(QString("Player Count: ") + QString::number(ui->playerList->count()));
 }
 
+/*
+ *  void MainWindow::startGame()
+ *  @funct:  starts the game, creating the GameWindow (and GameLogic for the host)
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::startGame(){
     if (isHost) game = new GameLogic(server);
     QVector<QString> allPlayerNames;
@@ -344,6 +401,12 @@ void MainWindow::startGame(){
     this->hide();
 }
 
+/*
+ *  void MainWindow::create_room_handler()
+ *  @funct:  handler for the createRoomBtn
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::create_room_handler() {
     playerName = ui->nameLineEdit->text().simplified();
     if (playerName.isEmpty()) {
@@ -361,6 +424,12 @@ void MainWindow::create_room_handler() {
     setRoomWindow();
 }
 
+/*
+ *  void MainWindow::join_room_handler()
+ *  @funct:  handler for the joinRoomBtn
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::join_room_handler() {
     ip = ui->serverNameLineEdit->text().simplified();
     if (ip.isEmpty()) {
@@ -384,6 +453,12 @@ void MainWindow::join_room_handler() {
     joinRoom();
 }
 
+/*
+ *  void MainWindow::sendPlayerName()
+ *  @funct:  sends the player's name to the server
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::sendPlayerName() {
     QJsonObject playerNameMsg;
     playerNameMsg["type"] = "playerName";
@@ -391,6 +466,12 @@ void MainWindow::sendPlayerName() {
     client->sendJson(playerNameMsg);
 }
 
+/*
+ *  void MainWindow::clientJsonReceived(const QJsonObject &json)
+ *  @funct:  QJson handler for the room
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void MainWindow::clientJsonReceived(const QJsonObject &json) {
     qDebug() << json;
     const QString type = json.value(QString("type")).toString();

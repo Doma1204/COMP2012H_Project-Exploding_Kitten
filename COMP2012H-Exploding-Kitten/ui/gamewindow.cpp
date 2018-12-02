@@ -8,6 +8,12 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
+/*
+ *  GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString name, QMap<QString,int> playerNames)
+ *  @funct:  creates the GameWindow object and initializes the GUI
+ *  @param:  parent: nullptr, client: the client pointer, playerNum: number of players, name: the player's name: playerNames: map of the player names and their order (for GUI purposes)
+ *  @return: N/A
+ */
 GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString name, QMap<QString,int> playerNames) :
     QDialog(parent),
     ui(new Ui::game_window),
@@ -52,14 +58,17 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
         playerLabel.push_back(newPlayer);
         if (playerNames.key(i,"Player" + QString::number(i))!=playerName) ui->playerListLayout->addLayout(newPlayer->layout);
     }
-
     this->show();
-
-
     connect(ui->endTurnBtn, &QPushButton::clicked, this, &GameWindow::endTurnBtnHandler);
     connect(client, &Client::receiveJson, this, &GameWindow::clientJsonReceived);
 }
 
+/*
+ *  GameWindow::~GameWindow()
+ *  @funct:  GameWindow destructor, deletes the dynamically created objects
+ *  @param:  N/A
+ *  @return: N/A
+ */
 GameWindow::~GameWindow()
 {
     playerLabel.clear();
@@ -71,11 +80,24 @@ GameWindow::~GameWindow()
     delete ui;
 }
 
+/*
+ *  void GameWindow::endTurnBtnHandler()
+ *  @funct:  triggered after the endTurnBtn has been pressed, sends this information to the server (and GameLogic) to be handled
+ *  @param:  N/A
+ *  @return: N/A
+ */
 void GameWindow::endTurnBtnHandler(){
     QJsonObject endTurnMsg;
     endTurnMsg["type"] = "endTurn";
     client->sendJson(endTurnMsg);
 }
+
+/*
+ *  void GameWindow::playCardBtnHandler(int currentCard, QString currentCardString)
+ *  @funct:  triggered after a card has been pressed, sends this information to the server (and GameLogic) to be handled
+ *  @param:  currentCard: index of the card played, currentCardString: name of the card played
+ *  @return: N/A
+ */
 void GameWindow::playCardBtnHandler(int currentCard, QString currentCardString){
     qDebug() << "Card Played:" + QString::number(currentCard);
     if (currentCardString == "DEFUSE")
@@ -86,6 +108,12 @@ void GameWindow::playCardBtnHandler(int currentCard, QString currentCardString){
     client->sendJson(playCardMsg);
 }
 
+/*
+ *  GameWindow::Player* GameWindow::createNewPlayer(QString name)
+ *  @funct:  creates the GUI for opponents
+ *  @param:  name: name of the opponent
+ *  @return: GameWindow::Player*: to be added to playerLabel
+ */
 GameWindow::Player* GameWindow::createNewPlayer(QString name) {
     Player *player = new Player;
     player->layout = new QVBoxLayout();
@@ -112,6 +140,13 @@ GameWindow::Player* GameWindow::createNewPlayer(QString name) {
     return player;
 }
 
+
+/*
+ *  void GameWindow::setPlayerCard(Player *player, int cardNum)
+ *  @funct:  handles and updates the GUI for opponents
+ *  @param:  player: the opposing player, cardNum: the number of cards in their hand
+ *  @return: N/A
+ */
 void GameWindow::setPlayerCard(Player *player, int cardNum) {
     player->card->setFont(*textFont);
     player->card->setText(QString::number(cardNum) + " Cards");
@@ -131,6 +166,12 @@ void GameWindow::setCurrentCard(QString cardType) {
     ui->currentCardLabel->setFont(*cardFont);
 }
 
+/*
+ *  void GameWindow::newCard(QString cardType)
+ *  @funct:  creates the GUI for the player's cards in hand
+ *  @param:  cardType: the name of the card to be added to the UI
+ *  @return: N/A
+ */
 void GameWindow::newCard(QString cardType) {
     QPushButton *newCard = new QPushButton(cardType == "SEE_THE_FUTURE" ? "SEE\nTHE\nFUTURE" : cardType);
     connect(newCard, &QPushButton::clicked, this, std::bind(&GameWindow::playCardBtnHandler, this, handLayout->count(), cardType));
@@ -142,6 +183,12 @@ void GameWindow::newCard(QString cardType) {
     handLayout->addWidget(newCard);
 }
 
+/*
+ *  void GameWindow::setCardStyle(QWidget *widget, QString cardType)
+ *  @funct:  styling for the card GUI
+ *  @param:  widget: pointer to the card to be changed, cardType: the desired type/style
+ *  @return: N/A
+ */
 void GameWindow::setCardStyle(QWidget *widget, QString cardType) {
     if (cardType == "DEFUSE")
         widget->setStyleSheet("color: #86C336; background-color: white; border: 7px solid #86C336; border-radius: 20px");
@@ -157,6 +204,12 @@ void GameWindow::setCardStyle(QWidget *widget, QString cardType) {
         widget->setStyleSheet("color: #646464; background-color: white; border: 7px solid #646464; border-radius: 20px");
 }
 
+/*
+ *  void GameWindow::clearLayout(QLayout *layout)
+ *  @funct:  resets the player's hand GUI
+ *  @param:  layout: pointer to the player's hand widget
+ *  @return: N/A
+ */
 void GameWindow::clearLayout(QLayout *layout) {
     while (QLayoutItem *item = layout->takeAt(0)) {
         if (QWidget *widget = item->widget())
@@ -164,6 +217,12 @@ void GameWindow::clearLayout(QLayout *layout) {
     }
 }
 
+/*
+ *  void GameWindow::clientJsonReceived(const QJsonObject &json)
+ *  @funct:  handler for the client when receiving information from server, updates the GUI accordingly
+ *  @param:  json: QJsonObject contianing the GUI information
+ *  @return: N/A
+ */
 void GameWindow::clientJsonReceived(const QJsonObject &json) {
     qDebug("Game Window Client Receive Json");
     const QString type = json.value(QString("type")).toString();
