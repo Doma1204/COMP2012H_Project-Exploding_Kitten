@@ -36,13 +36,13 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
     ui->currentPlayerLabel->setStyleSheet("color: white;");
 
 
-
     cardFont->setPointSize(40);
 
     for (int i=0;i<playerNum;i++) {
-        Player *newPlayer = createNewPlayer("Player" + QString::number(i));
+
+        Player *newPlayer = createNewPlayer(playerNames.key(i,"Player" + QString::number(i)));
         playerLabel.push_back(newPlayer);
-        ui->playerListLayout->addLayout(newPlayer->layout);
+        if (playerNames.key(i,"Player" + QString::number(i))!=playerName) ui->playerListLayout->addLayout(newPlayer->layout);
     }
 
     this->show();
@@ -57,7 +57,6 @@ GameWindow::~GameWindow()
 {
     delete ui;
 }
-
 
 
 void GameWindow::endTurnBtnHandler(){
@@ -150,20 +149,12 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
         ui->deckLabel->setText(QString::number(json.value(QString("deckSize")).toInt()) + " Cards Left");
         const QJsonObject playerHand = json.value(QString("playerHand")).toObject();
         const QJsonObject playerAlive = json.value(QString("playerAlive")).toObject();
-        for (QString player : playerHand.keys()) {
-            if (player == playerName) {
-                clearLayout(handLayout);
-                for (QJsonValue card : playerHand.value(player).toArray()) {
-                    newCard(card.toString());
-                }
-            }
-//            if (playerAlive.value(player).toBool()) {
-//                playerLabel[playerOrder.value(player)]->setText(player+": "+ QString::number(playerHand.value(player).toArray().size())+ " Cards");
-//            } else {
-//                playerLabel[playerOrder.value(player)]->setText(player+": Exploded");
-//            }
+        if (json.value("currentPlayer").toString() == playerName) {
+            ui->currentPlayerLabel->setText("Current Player:\n You");
+        }else {
+            ui->currentPlayerLabel->setText("Current Player:\n" + json.value("currentPlayer").toString());
         }
-        ui->currentPlayerLabel->setText("Current Player:\n" + json.value("currentPlayer").toString());
+
 //        recentMove->setText(json.value("prevMove").toString());
         if (json.value(QString("seeTheFutureFlag")).toBool()) {
             if (json.value(QString("currentPlayer")).toString() == playerName) {
@@ -196,8 +187,21 @@ void GameWindow::clientJsonReceived(const QJsonObject &json) {
             } else {
                 QMessageBox::information(nullptr, "Exploding Kitten!", winner + " has won the game!");
             }
-            endTurnBtn->disconnect();
-            playCardBtn->disconnect();
+        }
+        for (QString player : playerHand.keys()) {
+            if (player == playerName) {
+                clearLayout(handLayout);
+                for (QJsonValue card : playerHand.value(player).toArray()) {
+                    newCard(card.toString());
+                }
+            }else {
+
+            }
+            if (playerAlive.value(player).toBool()) {
+                playerLabel[playerOrder.value(player)]->card->setText(QString::number(playerHand.value(player).toArray().size())+ " Cards");
+            } else {
+                playerLabel[playerOrder.value(player)]->card->setText("EXPLODED");
+            }
         }
     }
 }
