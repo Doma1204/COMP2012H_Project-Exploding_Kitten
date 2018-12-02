@@ -93,7 +93,7 @@ bool GameLogic::defuse(QString playerName) {
 
 void GameLogic::playerPlayCard(QString card) {
     if (card == "SEE_THE_FUTURE") {
-        prevMove = currentPlayer + " played see the future and viewed the top three cards of the deck.";
+        prevMove = currentPlayer + " played See The Future and viewed the top three cards of the deck.";
         seeTheFutureFlag = true;
     }else if (card == "ATTACK") {
         qDebug()<<"ENTERING ATTACK"<<attacked;
@@ -107,7 +107,7 @@ void GameLogic::playerPlayCard(QString card) {
         skipped = true;
         endTurn();
     }else if (card == "SHUFFLE") {
-        prevMove = currentPlayer + " shuffled the deck.";
+        prevMove = currentPlayer + " played Shuffle and shuffled the deck.";
         random_shuffle( deck.begin(), deck.end(),myrand );
     } else if (card == "STEAL") {
         stealCard(currentPlayer);
@@ -137,9 +137,11 @@ void GameLogic::endTurn(){
         skipped = false;
         if (attacked == ATTACKED) {
             attacked = NONE;
+        }else {
+            setNextPlayer();
         }
         prevMove = currentPlayer + " played a skip and passed his turn.";
-        setNextPlayer();
+
     }
     else {
         switch(attacked) {

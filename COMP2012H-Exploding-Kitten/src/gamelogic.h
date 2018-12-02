@@ -1,8 +1,6 @@
 #ifndef GAMELOGIC_H
 #define GAMELOGIC_H
 
-#include "player.h"
-#include "card.h"
 #include <algorithm>
 #include "server.h"
 #include <QtDebug>
@@ -13,14 +11,14 @@
 using namespace std;
 
 
-#define INITIAL_HAND_SIZE 3
+#define INITIAL_HAND_SIZE 4
 
 #define INITIAL_DECK \
-    X(DEFUSE,0) \
-    X(ATTACK,10) \
-    X(SKIP,10) \
-    X(SEE_THE_FUTURE,3) \
-    X(SHUFFLE,1) \
+    X(DEFUSE,2) \
+    X(ATTACK,6) \
+    X(SKIP,6) \
+    X(SEE_THE_FUTURE,5) \
+    X(SHUFFLE,4) \
     X(STEAL, 4)
 
 

@@ -62,9 +62,14 @@ GameWindow::GameWindow(QWidget *parent, Client* client, int playerNum, QString n
 
 GameWindow::~GameWindow()
 {
+    playerLabel.clear();
+    playerLabel.squeeze();
+    delete cardSizePolicy;
+    delete cardFont;
+    delete textFont;
+    delete handLayout;
     delete ui;
 }
-
 
 void GameWindow::endTurnBtnHandler(){
     QJsonObject endTurnMsg;

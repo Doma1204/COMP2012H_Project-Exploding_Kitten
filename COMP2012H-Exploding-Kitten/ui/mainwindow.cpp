@@ -48,7 +48,40 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->joinRoomBtn->setStyleSheet("border: none; color: #fcdb20");
     ui->joinRoomBtn->hide();
 
+    startWindowBtnFont->setPointSize(20);
+    ui->instructionBtn->setFont(*startWindowBtnFont);
+    ui->instructionBtn->setStyleSheet("border: none; color: #fcdb20");
+    ui->instructionBtn->hide();
+
+    //Instruction Window
+    ui->instructionBackBtn->setFont(*startWindowBtnFont);
+    ui->instructionBackBtn->setStyleSheet("border: none; color: #fcdb20");
+    ui->instructionBackBtn->hide();
+
+    startWindowBtnFont->setPointSize(35);
+    ui->instructionLabel->setFont(*startWindowBtnFont);
+    ui->instructionLabel->setStyleSheet("border: none; color: #fcdb20");
+    ui->instructionLabel->hide();
+    roomWindowFont->setPointSize(12);
+    ui->instructionTextLabel->setFont(*roomWindowFont);
+     ui->instructionTextLabel->setWordWrap(true);
+    ui->instructionTextLabel->setText(
+                "Exploding Kittens is a 2-4 player online card game. \n"
+                "Each player take turns playing card and drawing from the deck. \n"
+                "Each card has a different function:\n"
+                "Skip: Ends the player’s turn without drawing\n"
+                "Attack: Next player must take two turns\n"
+                "Shuffle: Shuffles the deck\n"
+                "See the Future: View the top three cards of the deck\n"
+                "Steal: Steal a card from the next player’s hand\n"
+                "Defuse: Can only be used if the player draws an Exploding Kitten, the Exploding Kitten will be placed back into the deck randomly\n"
+                "If the player draws the Exploding Kitten but does not have a Defuse, he loses!\n"
+                );
+    ui->instructionTextLabel->setStyleSheet("border: none; color: white");
+    ui->instructionTextLabel->hide();
+
     //Room Window
+    roomWindowFont->setPointSize(15);
     ui->serverNameLabel->setFont(*roomWindowFont);
     ui->serverNameLabel->setStyleSheet("border:none; color: white;");
     ui->serverNameLabel->hide();
@@ -85,7 +118,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->createRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setCreateRoomWindow();});
     connect(ui->joinRoomBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setJoinRoomWindow();});
-
+    connect(ui->instructionBtn, &QPushButton::clicked, this, [this]() {deleteRequestRoomWindow(); setInstructionWindow();});
+    connect(ui->instructionBackBtn, &QPushButton::clicked,this,[this](){deleteInstructionWindow();setRequestRoomWindow();});
     ui->createBtn->setFont(*roomWindowFont);
     ui->createBtn->setStyleSheet("border: none; color: white;");
     connect(ui->createBtn, &QPushButton::clicked, this, &MainWindow::create_room_handler);
@@ -110,21 +144,41 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->leaveBtn->hide();
 
     setRequestRoomWindow();
+    delete startWindowBtnFont;
+    delete roomWindowFont;
+}
+
+void MainWindow::setInstructionWindow(){
+    ui->instructionBackBtn->show();
+    ui->instructionLabel->show();
+    ui->instructionTextLabel->show();
+}
+void MainWindow::deleteInstructionWindow(){
+    ui->instructionBackBtn->hide();
+    ui->instructionLabel->hide();
+    ui->instructionTextLabel->hide();
 }
 
 MainWindow::~MainWindow()
 {
+    ui->playerList->clear();
+    delete gameWindow;
+    delete game;
+    delete server;
+    delete client;
     delete ui;
 }
 
 void MainWindow::setRequestRoomWindow() {
     ui->createRoomBtn->show();
     ui->joinRoomBtn->show();
+    ui->instructionBtn->show();
 }
 
 void MainWindow::deleteRequestRoomWindow() {
     ui->createRoomBtn->hide();
     ui->joinRoomBtn->hide();
+    ui->instructionBtn->hide();
 }
 
 void MainWindow::setCreateRoomWindow() {
@@ -237,6 +291,14 @@ void MainWindow::leaveRoom() {
     }
 }
 
+void MainWindow::leaveRoomNoPrompt() {
+    if (gameWindow) delete gameWindow;
+    isConnect = false;
+    deleteRoomWindow();
+    destroyRoom();
+    setRequestRoomWindow();
+}
+
 void MainWindow::forceLeaveRoom() {
     if (!isConnect)
         return;
@@ -278,6 +340,7 @@ void MainWindow::startGame(){
     }
 
     gameWindow = new GameWindow(nullptr, client,ui->playerList->count(), playerName,playerNameMap);
+    connect(gameWindow,&GameWindow::close,this,&MainWindow::leaveRoomNoPrompt);
     this->hide();
 }
 

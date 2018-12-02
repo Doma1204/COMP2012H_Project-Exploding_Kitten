@@ -49,10 +49,13 @@ private:
     void deleteJoinRoomWindow();
     void setRoomWindow();
     void deleteRoomWindow();
+    void setInstructionWindow();
+    void deleteInstructionWindow();
 
     void destroyRoom();
     void joinRoom();
     void leaveRoom();
+    void leaveRoomNoPrompt();
     void forceLeaveRoom();
     void addPlayer(const QString &playerName);
     void removePlayer(const QString &playerName);
